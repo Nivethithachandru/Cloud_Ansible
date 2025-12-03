@@ -6,6 +6,8 @@
   vars:
     remote_project_path: "/home/ubuntu/Cloud_Ansible"
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
+    git_username: "{{ lookup('env', 'GIT_USERNAME') }}"
+    git_token: "{{ lookup('env', 'GIT_TOKEN') }}"
 
   tasks:
 
@@ -17,7 +19,7 @@
 
     - name: Clone latest Cloud_Ansible repo 
       git:
-        repo: "{{ git_repo_url }}"
+        repo: "https://{{ git_username }}:{{ git_token }}@{{ git_repo_url }}"
         key_file: "/home/cosai/.ssh/cloud_movable"
         dest: "{{ remote_project_path }}"
         version: main
