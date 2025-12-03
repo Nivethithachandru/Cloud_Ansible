@@ -3,9 +3,9 @@
   hosts: ansible_client
   become: yes
 
-  vars:
+  #vars:
     remote_project_path: "/home/ubuntu/Cloud_Ansible"
-    git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
+    #git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
 
@@ -16,8 +16,7 @@
         update_cache: yes
 
     - name: Clone latest Cloud_Ansible repo 
-      git:
-        repo: "{{ git_repo_url }}"
+      command: git clone https://github.com/Nivethithachandru/Cloud_Ansible.git
         dest: "{{ remote_project_path }}"
         version: main
         depth: 1
