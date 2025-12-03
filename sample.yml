@@ -18,6 +18,7 @@
     - name: Clone latest Cloud_Ansible repo 
       git:
         repo: "{{ git_repo_url }}"
+        key_file: "/home/cosai/.ssh/cloud_movable"
         dest: "{{ remote_project_path }}"
         version: main
         depth: 1
