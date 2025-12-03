@@ -4,7 +4,7 @@
   become: yes
 
   vars:
-    remote_project_path: "/home/ubuntu/Cloud_movable"
+    remote_project_path: "/home/ubuntu/Cloud_Ansible"
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
