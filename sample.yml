@@ -5,18 +5,26 @@
 
   vars:
     remote_project_path: "/home/ubuntu/Cloud_Ansible"
-    #git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
+    git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
 
-    - name: Ensure git is installed
+    - name: Ensure git is installed on remote host
       apt:
         name: git
         state: present
         update_cache: yes
+      become: yes
 
-    - name: Clone latest Cloud_Ansible repo 
-      command: git clone https://github.com/Nivethithachandru/Cloud_Ansible.git
+    - name: Remove existing project folder (optional, ensures fresh clone)
+      file:
+        path: "{{ remote_project_path }}"
+        state: absent
+      become: yes
+
+    - name: Clone Cloud_Ansible repo from GitHub
+      git:
+        repo: "{{ git_repo_url }}"
         dest: "{{ remote_project_path }}"
         version: main
         depth: 1
