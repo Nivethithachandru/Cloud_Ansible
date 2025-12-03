@@ -9,19 +9,19 @@
 
   tasks:
 
-    - name: Ensure git is installed
+   - name: Ensure git is installed
       apt:
         name: git
         state: present
         update_cache: yes
 
-   - name: Clone latest Cloud_Ansible repo
-     git:
-       repo: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
-       dest: "{{ remote_project_path }}"
-       version: main
-       depth: 1
-       force: yes
+    - name: Clone latest Cloud_Ansible repo
+      git:
+        repo: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
+        dest: "{{ remote_project_path }}"
+        version: main
+        depth: 1
+        force: yes
 
 
     - name: Build Docker image
