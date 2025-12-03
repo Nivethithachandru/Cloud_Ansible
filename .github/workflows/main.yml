@@ -1,4 +1,4 @@
-name: update_movablekit GitHubaction
+name: cloud_ansible GitHubaction
 
 on:
   workflow_dispatch:  
