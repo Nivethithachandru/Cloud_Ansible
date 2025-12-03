@@ -19,7 +19,7 @@
 
     - name: Clone latest Cloud_Ansible repo 
       git:
-        repo: "https://{{ git_username }}:{{ git_token }}@{{ git_repo_url }}"
+        repo: "https://{{ git_username }}:{{ git_token }}@github.com/Nivethithachandru/Cloud_Ansible.git"
         dest: "{{ remote_project_path }}"
         version: main
         depth: 1
