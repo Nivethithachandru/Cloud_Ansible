@@ -3,7 +3,7 @@
   hosts: ansible_client
   become: yes
 
-  #vars:
+  vars:
     remote_project_path: "/home/ubuntu/Cloud_Ansible"
     #git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
