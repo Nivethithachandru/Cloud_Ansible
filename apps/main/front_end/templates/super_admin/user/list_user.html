@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+ 
+  </head>
+  
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          {% include 'header_nav.html' %}
+
+           
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                <span class="text-muted fw-light">{{ session.role_name }} /</span> Users List
+              </h4>
+
+          
+
+              <!-- Ajax Sourced Server-side -->
+              <div class="card mt-5">
+                <h5 class="card-header">Users List</h5>
+
+                
+                {% if session.role_id == 0  or page_permission %}
+
+                    <div class="card-datatable text-nowrap table-responsive">                                    
+                        <table class=" table table-bordered" id="users_table">
+                            <thead>
+                                <tr>
+                                    <th>Serial No.</th>
+                                    <th>User ID</th>
+                                    <th>User Name</th>
+                                    <th>Role</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>                             
+                            </tbody>
+                        </table>                                    
+                    </div>
+                {% else %}
+                        <div class=" h-100">
+                            <div class="card-header">
+                                <div class="alert alert-danger" role="alert">
+                                    Access Denied: You do not have the necessary permissions to view this page.
+                                </div>
+                            </div>
+                        </div>                           
+                {% endif %}
+
+                
+            </div>
+              <!--/ Ajax Sourced Server-side -->
+              <div class="modal fade" id="edit_user_password" tabindex="-1" aria-labelledby="edit_user_password" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="update_pass">Update Password</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Alert container for showing messages inside the modal -->
+                            <div id="modal-alert-container"></div>
+            
+                            <form id="edit_user_password">
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <label for="user_name" class="col-sm-2 col-form-label">Username</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" class="form-control" id="user_name" name="user_name" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <label for="user_email" class="col-sm-2 col-form-label">User Email</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="email" class="form-control" id="user_email" name="user_email" readonly>
+                                    </div>
+                                </div>
+                                
+                                
+                                
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <div class="form-password-toggle">
+                                        <label class="form-label" for="formValidationPass">Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input
+                                                class="form-control"
+                                                type="password"
+                                                id="formValidationPass"
+                                                name="new_password"  
+                                                required
+                                                aria-describedby="multicol-password2" />
+                                            <span class="input-group-text cursor-pointer" id="multicol-password2">
+                                                <i class="bx bx-hide"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <div class="form-password-toggle">
+                                        <label class="form-label" for="formValidationConfirmPass">Confirm Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input
+                                                class="form-control"
+                                                type="password"
+                                                id="formValidationConfirmPass"
+                                                name="confirm_password" 
+                                                required
+                                                aria-describedby="multicol-confirm-password2" />
+                                            <span class="input-group-text cursor-pointer" id="multicol-confirm-password2">
+                                                <i class="bx bx-hide"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="saveuserpassword">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+                <!--/ Ajax Sourced Server-side -->
+
+              
+       
+              
+            </div>
+            
+            </div>
+          
+            <div class="content-backdrop fade"></div>
+          </div>
+  
+        </div>
+ 
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+   {% include 'script_file.html' %}
+
+  </body>
+   
+  <script>
+    
+
+    const edit_permission = {{ 'true' if edit_permission else 'false' }};
+    const delete_permission = {{ 'true' if delete_permission else 'false' }};
+
+    const session_role_id = {{ session.role_id }};
+
+    function checkAccess(roleId) {
+        return roleId === 0 || roleId === 5;
+    }
+    
+    const passwordupdated_permission = checkAccess(session_role_id);
+    console.log("Access Denied:", passwordupdated_permission);
+
+    console.log("Edit User permission:", edit_permission);
+    console.log("Delete User permission:", delete_permission);
+
+
+
+    $(document).ready(function() {
+        const usersTable = $('#users_table').DataTable({
+            "processing": true,
+            "serverSide": false,
+            "ajax": {
+                "url": "/main/user/userlist/",
+                "dataSrc": "data"
+            },
+            "columns": [
+                {
+                     data: null,
+                    render: function(data, type, full, meta) {
+                    return meta.row + 1; 
+                    }
+                },
+                { "data": "user_id" },
+                { "data": "user_name" },
+                { "data": "role_name" }, 
+                { "data": "user_email" },
+                {
+                    "data": null,
+                    render: function(data, type, row) {
+                        return `
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item edit-user" data-id="${row.serial_no}">  <!-- Use user ID for edit -->
+                                        <i class="bx bx-edit-alt me-1"></i> Edit
+                                    </a>
+                                    <a class="dropdown-item delete-user" data-id="${row.serial_no}">  <!-- Use user ID for delete -->
+                                        <i class="bx bx-trash me-1"></i> Delete
+                                    </a>
+                                    <a class="dropdown-item updatepass-user" data-id="${row.serial_no}"> 
+                                        <i class="fas fa-key me-1"></i> Update Password
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            ]
+        });
+        
+        $('#users_table tbody').on('click', '.edit-user', function() {
+            var userId = $(this).data('id');  
+            if (!edit_permission) {
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: 'You do not have permission to edit users.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return; 
+            }
+            window.location.href = `/main/user/edit/${userId}`;
+        });
+
+        $('#users_table tbody').on('click', '.delete-user', function() {
+            const userId = $(this).data('id');  
+            if (!delete_permission) {
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: 'You do not have permission to delete users.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return; 
+            }
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/main/user/delete/${userId}/`,  
+                        type: 'DELETE',
+                        success: function(response) {
+                            Swal.fire(
+                                'Deleted!',
+                                'User deleted successfully!',
+                                'success'
+                            );
+                            usersTable.ajax.reload();  
+                        },
+                        error: function(xhr) {
+                            Swal.fire(
+                                'Error!',
+                                'Error deleting user.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+
+        
+        $('#users_table tbody').on('click', '.updatepass-user', function() {
+    
+            if (!passwordupdated_permission) {
+                Swal.fire({
+                    title: 'Access Denied!',
+                    text: 'You do not have permission to Update password.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return; 
+            }
+
+            var rowData = $('#users_table').DataTable().row($(this).parents('tr')).data();
+            $('#user_name').val(rowData.user_name);  
+            $('#user_email').val(rowData.user_email); 
+            $('#edit_user_password').modal('show');  
+        });
+        
+        
+
+        
+        $('#saveuserpassword').on('click', function() {
+            var user_email = $('#user_email').val();
+            var new_password = $('#formValidationPass').val();
+            var confirm_password = $('#formValidationConfirmPass').val();
+            
+            if ( !new_password || !confirm_password) {
+                alertHandler1('All fields are required. Please fill in all fields.', false);
+                return;
+            }
+        
+            if (new_password !== confirm_password) {
+                alertHandler1('password and confirm password do not match', false);
+                return;
+            }
+        
+            $.ajax({
+                url: '/main/user/update_password/',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    user_email: user_email,
+                    new_password: new_password,
+                }),
+                success: function(response) {
+                    if (response.message) {
+                        alertHandler1(response.message, true);
+                    } else {
+                        alertHandler1('User Password updated successfully!', true);
+                    }
+                },
+                error: function(error) {
+                    // Handle different types of errors based on the status code
+                    if (error.responseJSON && error.responseJSON.detail) {
+                        alertHandler1(error.responseJSON.detail, false);
+                    } else {
+                        console.error('Error updating:', error);
+                        alertHandler1('Failed to update User Password. Please try again.', false);
+                    }
+                }
+            });
+        });
+        
+        
+        
+        
+        
+        // Function to handle modal-specific alerts
+        function alertHandler1(message, isSuccess) {
+            const alertContainer = document.getElementById('modal-alert-container');
+            const alertClass = isSuccess ? 'alert-success' : 'alert-danger';
+            const alertMessage = document.createElement('div');
+            alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+            alertMessage.textContent = message;
+            alertContainer.appendChild(alertMessage);
+            
+            setTimeout(() => {
+                alertMessage.classList.add('slide-in-active');
+            }, 10);
+        
+            setTimeout(() => {
+                alertMessage.classList.remove('slide-in-active');
+                alertMessage.classList.add('slide-out-active');
+                setTimeout(() => {
+                    alertContainer.removeChild(alertMessage);
+                }, 500);
+            }, 3000);
+        }
+        
+
+
+        
+
+
+
+    });
+    
+</script>
+
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+
+.alert-msg {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation-duration: 0.6s;
+            position: relative;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide-in {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .slide-in-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+      <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+        <div class="app-brand demo">
+          <a href="javascript:void(0);" class="app-brand-link">
+            <img src="{{ url_for('static', path='assets/site_logo/sesha_logo.png') }}" alt="Logo" width="80%" class="app-brand-text demo menu-text fw-bold ms-2 mt-2" />
+          </a>
+        </div>
+        <small  href="#" class="text-danger fw-bold" style="margin-left: 30px; font-size: 13px;">Automatic Traffic Count and Classifier</small>
+        <div class="menu-divider mt-0"></div>
+        <div class="menu-inner-shadow"></div>        
+      </aside>
+
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">   {{ session.role_name }} /</span>Add Device
+                </h4>
+                <div class="row mb-4  ">
+                    <div class="col-lg-6 col-md-8 col-sm-12">
+                        <div class="card">
+                          <h5 class="card-header">Register Device</h5>
+                          <div class="card-body">
+                            <form  id="role_assesstion_form">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Device Name</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="org_name"
+                                  placeholder="Device Name"
+                                  required />
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">LPU ID</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="lpu_id"
+                                  placeholder="LPU ID"
+                                  required />
+                              </div>
+
+
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">LPU IP</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="lpu_ip"
+                                  placeholder="Lpu Ip"
+                                  required />
+                              </div>
+
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Device ID</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="device_id"
+                                  placeholder="Device ID"
+                                  required />
+                              </div>
+
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">LPU Name</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="lpu_name"
+                                  placeholder="Lpu Name"
+                                  required />
+                              </div>
+                            
+                              
+                              <div class="row">
+                                <div class="col-12">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </div>
+
+
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+   
+   $(document).ready(function() {
+    $('#role_assesstion_form').submit(function(e) {
+        e.preventDefault();
+
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'block';
+            loadingMessageDiv.innerText = message;
+            loadingMessageDiv.style.color = 'white';
+            loadingMessageDiv.style.backgroundColor = 'blue';
+            loadingMessageDiv.style.padding = '10px';
+            loadingMessageDiv.style.borderRadius = '5px';
+        }
+
+        function hideLoading() {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'none';
+        }
+
+        // Get form values
+        let org_name = $('#org_name').val();
+        let lpu_ip = $('#lpu_ip').val();
+        let lpu_name = $('#lpu_name').val();
+        let device_id=$('#device_id').val();
+        let lpu_id=$('#lpu_id').val();
+
+        showLoading("Submitting...");
+
+        $.ajax({
+            url: '/main/device/add/',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                org_name: org_name,
+                lpu_ip: lpu_ip,
+                lpu_name: lpu_name,
+                device_id:device_id,
+                lpu_id:lpu_id
+            }),
+            success: function(response) {
+                hideLoading();
+                showAlert(response.message, 'success');
+                console.log("Form Submitted Successfully:", response);
+
+                setTimeout(function() {
+                    window.location.href = response.redirect_url;
+                }, 1000);
+
+                $('#role_assesstion_form')[0].reset(); 
+            },
+            error: function(xhr) {
+                hideLoading();
+                let errorMessage = "An error occurred.";
+                try {
+                    errorMessage = JSON.parse(xhr.responseText).message;
+                } catch (e) {}
+
+                showAlert("Error: " + errorMessage, 'danger');
+            }
+        });
+    });
+});
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.org_status === true) {
+            Toastify({
+                text: data.latest_status.message || "Organization Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+
+  </script>
+</html>

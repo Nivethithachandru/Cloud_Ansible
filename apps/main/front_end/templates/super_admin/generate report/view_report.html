@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                  <span class="text-muted fw-light">{{ session.role_name }} /</span> View Report
+              </h4>
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+
+
+                    <div class="card mt-5">
+                    <h5 class="card-header">Analytics</h5>
+
+                    {% if session.role_id == 0  or page_permission %}
+
+                    <div class="card-datatable text-nowrap table-responsive">
+                        <table class=" table table-bordered" id="users_table">
+                            <thead>
+                                <tr>
+                                    <th>S.no</th>
+                                    <th>Project ID</th>
+                                    <th>Detection ID</th>
+                                    <th>Project Name</th>
+                                    <th>Camera IP</th>
+                                    <th>Start Time</th>
+                                    <th>End Time </th>
+                                    <th>VMS Video </th>
+                                    <th>Analytics</th>
+                                    <th>View Report</th>
+                                    <th>Excel Download</th>
+                                    <th>Daily Report</th>
+                                    <th>Chart</th>
+                                    <th>Actions</th>
+                                    
+                                    
+                                  
+                                </tr>
+                               
+                            </thead>
+                            <tbody>
+                                 
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% else %}
+                            <div class=" h-100">
+                                <div class="card-header">
+                                    <div class="alert alert-danger" role="alert">
+                                        Access Denied: You do not have the necessary permissions to view this page.
+                                    </div>
+                                </div>
+                            </div>                           
+                    {% endif %}
+
+     
+                    
+              </div>
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+                <div id="loading" style="display:none; position: fixed; top: 50%; left: 55%; transform: translate(-50%, -50%); z-index: 1000;">
+                    <div class="col">
+                        <div class="sk-fold sk-primary">
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                        </div>
+                    </div>  
+                </div>
+
+
+              
+          </div>
+          
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+const delete_permission = {{ 'true' if delete_permission else 'false' }};
+$(document).ready(function() {
+    const usersTable = $('#users_table').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "autoWidth": true,
+        "ajax": {
+            "url": "/main/report_list",
+            "dataSrc": "data"
+        },
+        "columns": [
+            {
+                data: null,
+                render: function(data, type, full, meta) {
+                    return meta.row + 1; 
+                }
+            },
+            { "data": "project_id" }, 
+            {"data":"detection_id"},
+            { "data": "project_name" },
+            { "data": "camera_ip" }, 
+            {"data":"start_time"},
+            {"data":"end_time"},
+            {
+                data: null,
+                render: function(data) {
+                  
+                    return `
+                    <button type="button" class="btn btn-sm btn-warning start-btn" 
+                    onclick="vms_view('${data.project_id}','${data.camera_ip}','${data.detection_id}','${data.start_time}','${data.end_time}')"> 
+                    <i class="fa-solid fa-video"></i></button>`;
+                   
+                }
+            },
+            {"data":"line_id"},
+            {
+                data: null,
+                render: function(data) {
+                    return `
+                        <button type="button" class="btn btn-sm btn-primary start-btn" onclick="view('${data.project_id}','${data.camera_ip}','${data.detection_id}')"> 
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    `;
+                }
+            },
+            {
+                data: null,
+                render: function(data) {
+                    const endTime = data.end_time ? data.end_time : new Date().toISOString();
+                    return `
+                        <button type="button" class="btn btn-sm btn-success download-btn" onclick="view_download('${data.project_id}','${data.camera_ip}','${data.detection_id}','${data.start_time}','${endTime}','${data.line_id}')">
+                            <i class="fa-solid fa-file-excel"></i>
+                        </button>
+                        <span id="loadingMessage" style="display:none;">loading...</span>
+                    `;
+                }
+            },
+            {
+                data: null,
+                render: function(data) {
+                    const endTime = data.end_time ? data.end_time : new Date().toISOString();
+                    return `
+                        <button type="button" class="btn btn-sm btn-success start-btn" onclick="daily('${data.project_id}','${data.camera_ip}','${data.detection_id}','${data.start_time}','${endTime}','${data.line_id}')"> 
+                            <i class="fa-solid fa-file-excel"></i>
+                        </button>
+                    `;
+                }
+            },
+            {   
+                data: null,
+                render: function(data) {
+                    return `
+                        <button type="button" class="btn btn-sm btn-info start-btn" onclick="report_chart('${data.project_id}','${data.detection_id}')"> 
+                            <i class="fa-solid fa-chart-simple"></i>
+                        </button>
+                    `;  
+                }
+            },
+            {
+                "data": null,
+                render: function(data, type, row) {
+                    return `
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item delete-lpu" data-detection_id="${row.detection_id}">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        ]
+    });
+
+
+
+    $('#users_table tbody').on('click', '.delete-lpu', function() {
+        const detection_id = $(this).data('detection_id'); 
+        console.log("detection id:#$#%:",detection_id)
+        
+
+        if (!delete_permission) {
+            Swal.fire({
+                title: 'Access Denied!',
+                text: 'You do not have permission to delete LPU.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return; 
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You wont be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/main/detection/delete/${detection_id}`,
+                    type: 'DELETE',
+                    data: JSON.stringify({detection_id: detection_id }), 
+                    contentType: "application/json",
+                    success: function(response) {
+                        Swal.fire('Marked!', 'Detection marked for deletion. It will be removed soon', 'success');
+                        usersTable.ajax.reload();  
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Error deleting record.', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+    
+
+async function vms_view(project_id, camera_ip, detection_id, start_time, end_time) {
+    console.log("vms view details:", project_id, camera_ip, detection_id, start_time, end_time);
+    const url = `/detection/vms/project/${project_id}/detection/${detection_id}/`;
+    window.location.href = url;
+}
+
+async function view_download(project_id, camera_ip, detection_id, start_time, end_time,line_id) {
+    console.log("fetched details:", project_id, camera_ip, detection_id, start_time, end_time,line_id);
+    const url = `/hourly/download/${project_id}/${detection_id}/${camera_ip}`;
+    window.location.href = url;
+}
+    
+async function report_chart(project_id,detection_id) {
+
+    console.log("chart details:",project_id,detection_id)
+
+    const url = `/main/project/${project_id}/detect/${detection_id}/report/`;
+    window.location.href = url;
+}
+
+async function view(project_id,camera_ip,detection_id) {
+
+    console.log("view details:",project_id,camera_ip,detection_id)
+  
+    const url = `/main/view/datatable/${project_id}/${camera_ip}/${detection_id}`;
+    window.location.href = url;
+}
+
+
+async function daily(project_id,camera_ip,detection_id,start_time,end_time,line_id) {
+      
+    
+    const startTime=start_time
+    const endTime=end_time
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_').slice(0, 19); 
+
+    try {
+        
+        loading.style.display = 'inline-block';
+
+        const response = await fetch(`/realtime/dayreport?project_id=${project_id}&camera_ip=${camera_ip}&detection_id=${detection_id}&start_time=${start_time}&end_time=${end_time}&line_id=${line_id}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            },
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error: ${response.status} ${response.statusText}. Details: ${errorText}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `Movable_Day_report_${start_time}_${timestamp}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        alertHandler("Report downloaded!", true);
+
+    } catch (error) {
+        console.error('Error fetching report:', error);
+        alertHandler("Error in downloading!", false);
+    } finally {
+     
+        loading.style.display = 'none';
+    }
+}
+    
+async function summary(project_id,camera_ip,detection_id,start_time,end_time,line_id) {
+      
+    
+      const startTime=start_time
+      const endTime=end_time
+      const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_').slice(0, 19); 
+
+      try {
+          
+          loading.style.display = 'inline-block';
+
+          const response = await fetch(`/realtime/monthlyreport?project_id=${project_id}&camera_ip=${camera_ip}&detection_id=${detection_id}&start_time=${start_time}&end_time=${end_time}&line_id=${line_id}`, {
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+              },
+          });
+
+          if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Error: ${response.status} ${response.statusText}. Details: ${errorText}`);
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `Movable_Day_report_${start_time}_${timestamp}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+
+          alertHandler("Report downloaded!", true);
+
+      } catch (error) {
+          console.error('Error fetching report:', error);
+          alertHandler("Error in downloading!", false);
+      } finally {
+       
+          loading.style.display = 'none';
+      }
+  }
+
+
+
+
+
+
+
+
+
+
+
+function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; // Change class based on success or failure
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+
+    // Append the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // Trigger the slide-in effect
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+
+    // Remove the alert after some time
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+
+        // Remove the alert from the DOM after animation
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); // Duration before the alert starts to fade out
+}
+
+     
+  </script>
+  </html>

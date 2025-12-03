@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+
+      .alert-msg {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation-duration: 0.6s;
+            position: relative;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide-in {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .slide-in-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> Camera Assesments
+                </h4>
+                <div class="row mb-4 ">
+                    <div class="col-lg-6 col-md-8 col-sm-12">
+                        <div class="card">
+                          <h5 class="card-header">Add New Camera</h5>
+                          <div class="card-body">
+                            <form  id="lpu_assesstion_form">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+                                
+                                <!-- LPU ID  -->
+                                <div class="mb-3">
+                                  <label class="form-label" for="lpu_id">LPU Id</label>
+                                  <input type="text" class="form-control" id="lpu_id" value="{{ session.lpu_id }}" required disabled />
+
+                              </div>
+                              
+                              <!-- LPU Name -->
+                              <div class="mb-3">
+                                  <label class="form-label" for="lpu_name">LPU Name</label>
+                                  <input type="text" class="form-control" id="lpu_name" value="{{ session.lpu_name }}" required disabled />
+                              </div>
+                              
+                              <div class="mb-3">
+                                  <label class="form-label" for="lpu_ip">LPU IP Address</label>
+                                  <input type="text" class="form-control" id="lpu_ip" value="{{ session.lpu_ip }}" required disabled />
+
+                              </div>
+                              
+                              
+                              
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Camera Name</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="camera_name"
+                                  placeholder="Camera Name"
+                                  required />                        
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Camera IP Address</label>
+                                 <input
+                                  type="text"
+                                  class="form-control"
+                                  id="camera_ip"
+                                  placeholder="Camera IP Address"
+                                  required />                       
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Camera Username</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="camera_username"
+                                  placeholder="Camera Username"
+                                  required />                        
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Camera Password</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="camera_password"
+                                  placeholder="Camera Password"
+                                  required />                        
+                              </div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Camera Port</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="camera_port"
+                                  placeholder="Camera Port"
+                                  required />                        
+                              </div>
+
+                              <div class="row">
+                                <div class="col-12">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </div>
+
+
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+    $(document).ready(function() {
+    $('#lpu_assesstion_form').submit(function(e) {
+        e.preventDefault();
+
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show loading message
+        const loadingMessageDiv = $('#loadingMessage');
+        loadingMessageDiv.show().text("Submitting...");
+
+        const lpu_id = $('#lpu_id').val();
+        const lpu_name = $('#lpu_name').val();
+        const lpu_ip = $('#lpu_ip').val();
+        
+
+        const camera_ip = $('#camera_ip').val();
+        const camera_name = $('#camera_name').val();
+        const camera_port = $('#camera_port').val();
+        const camera_username = $('#camera_username').val();
+        const camera_password = $('#camera_password').val();
+
+        console.log("camera details:",lpu_id,lpu_name,lpu_ip)
+        
+
+        $.ajax({
+            url: '/main/lpu/add/',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                lpu_id: lpu_id,
+                lpu_name: lpu_name,
+                lpu_ip: lpu_ip,
+                camera_ip: camera_ip,
+                camera_name: camera_name,
+                camera_port: camera_port,
+                camera_username: camera_username,
+                camera_password: camera_password,
+                
+            }),
+            success: function(response) {
+                loadingMessageDiv.hide();
+                showAlert(`Lpu "${response.lpu}" created successfully!`, 'success');
+                $('#lpu_assesstion_form')[0].reset();  
+            },
+            error: function(xhr) {
+
+                
+                loadingMessageDiv.hide();
+                errorMessage = JSON.parse(xhr.responseText).message;                  
+                showAlert("Error: " + errorMessage, 'danger');
+
+            }
+        });
+    });
+});
+function dbupdate() {
+    fetch("/lpu_status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.lpu_status === true) {
+            Toastify({
+                text:  "LPU Data Updated in Local DB!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+  </script>
+</html>

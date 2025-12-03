@@ -1,0 +1,212 @@
+
+
+
+    <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+        <div class="container-fluid">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+    
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+             
+    
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+          
+    
+              <!-- Style Switcher -->
+              <li class="nav-item me-2 me-xl-0">
+                <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
+                  <i class="bx bx-sm"></i>
+                </a>
+              </li>
+              <!--/ Style Switcher -->
+              
+
+
+<!-- VMS Notification -->
+
+<li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-2">
+  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+    <i class="bx bx-bell bx-sm"></i>
+    <span class="badge bg-danger rounded-pill badge-notifications">
+      {{ session['vms_notifications']|length }}
+    </span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end py-0">
+    <li class="dropdown-menu-header border-bottom">
+      <div class="dropdown-header d-flex align-items-center py-3">
+        <h5 class="text-body mb-0 me-auto">Notifications</h5>
+        <a href="javascript:void(0)" class="dropdown-notifications-all text-body" 
+          data-bs-toggle="tooltip" data-bs-placement="top" 
+          aria-label="Mark all as read" data-bs-original-title="Mark all as read" 
+          onclick="markAllAsRead()">
+            <i class="bx fs-4 bx-envelope-open"></i>
+        </a>
+
+      </div>
+    </li>
+
+    <li class="dropdown-notifications-list scrollable-container">
+      <ul class="list-group list-group-flush">
+        {% for notification in session['vms_notifications'] %}
+        <li class="list-group-item list-group-item-action dropdown-notifications-item">
+          <div class="d-flex">
+            <div class="flex-shrink-0 me-3">
+              <div class="avatar">
+                <span class="avatar-initial rounded-circle bg-label-warning"><i class="bx bx-error"></i></span>
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1">File Downloaded Successfully</h6>
+              <p class="mb-0">
+                Project ID: {{ notification.project_id }}, Detection ID: {{ notification.detection_id }}
+              </p>
+              <button class="btn btn-sm btn-primary mt-1" onclick="downloadFile('{{ notification.n_pk }}', '{{ notification.vms_download_filename }}')">
+                Download
+              </button>
+            </div>
+            <div class="flex-shrink-0 dropdown-notifications-actions">
+              <button class="dropdown-notifications-read btn" 
+                      data-id="{{ notification.n_pk }}" 
+                      onclick="markAsRead(this)">
+                  <span class="bx bx-x fs-4"></span>  <!-- Larger X icon and red color -->
+              </button>
+          </div>
+          
+          
+          </div>
+        </li>
+        {% else %}
+        <li class="list-group-item text-center text-muted">No notifications</li>
+        {% endfor %}
+      </ul>
+    </li>
+  </ul>
+</li>
+
+<!-- VMS Notification -->
+
+
+ 
+
+
+
+
+
+    
+    
+              <!-- User -->
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="{{ url_for('static', path='assets/img/avatars/1.png') }}" alt="Avatar" class="rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="{{ url_for('static', path='assets/img/avatars/1.png') }}" alt class="rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block lh-1">{{ session.user_name }}</span>
+                          <small> {{ session.role_name }}</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                 
+                  <!-- <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.reset_pass') }}" id="reset_pass">
+                          <i class="fa fa-key me-2"></i>
+                          <span class="align-middle">Reset Password</span>
+                      </a>
+                  </li> -->
+                  
+                  
+                  <li>
+                      <a class="dropdown-item" href="{{ url_for('auth.logout') }}" id="logoutButton">
+                          <i class="bx bx-power-off me-2"></i>
+                          <span class="align-middle">Log Out</span>
+                      </a>
+                  </li>
+                  
+
+
+                </ul>
+              </li>
+            </ul>
+          </div>
+    
+          
+        </div>
+      </nav>
+ 
+
+<script>
+function markAsRead(element) {
+    let notificationId = element.getAttribute("data-id");
+
+    fetch(`/notifications/${notificationId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+    }).then(response => response.json())
+      .then(data => {
+          console.log(data.message);
+          //element.closest('.dropdown-notifications-actions').remove();
+          element.closest('.list-group-item').remove();
+      })
+      .catch(error => console.error("Error:", error));
+}
+
+
+function markAllAsRead() {
+  $.ajax({
+      url: '/notifications/mark_all_as_read',
+      method: 'POST',
+      success: function(response) {
+          const notifications = document.querySelectorAll('.dropdown-notifications-item');
+          notifications.forEach(notification => {
+              // Simply remove the <li> notification element
+              notification.remove();
+          });
+      },
+      error: function(xhr, status, error) {
+          alert('An error occurred while marking all notifications as read.');
+      }
+  });
+}
+
+
+
+
+
+function downloadFile(notificationId, filename) {
+  $.ajax({
+      url: `/files/${notificationId}`, 
+      type: 'GET',
+      xhrFields: { responseType: 'blob' }, 
+      success: function(response) {
+          const blob = new Blob([response], { type: "video/mp4" });
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = filename || `video_${Date.now()}.mp4`;
+          link.click();
+      },
+      error: function(xhr, status, error) {
+          console.error('Error downloading file:', error);
+          alert('Failed to download the file.');
+      }
+  });
+}
+
+</script>

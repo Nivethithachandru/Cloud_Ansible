@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> User Assesments
+                </h4>
+                <div class="row mb-4 col-6">
+                    <div class="col-md">
+                        <div class="card">
+                          <h5 class="card-header">Create User Account</h5>
+                          <div class="card-body">
+                            <form  id="user_assesstion_form">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+
+                                
+                                <!-- Roles Dropdown -->
+                                <div class="mb-3">
+                                    <label class="form-label" for="role_select">Role</label>
+                                    <select class="form-control" id="role_select" name="role_id" required>
+                                        <option value="" selected disabled>Select Role</option>
+                                        {% for role in roles %}
+                                        <option value="{{ role.id }}">{{ role.role_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                  <label class="form-label" for="bs-validation-name">User ID</label>
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    id="user_id"
+                                    placeholder="User ID"
+                                    required />                        
+                                </div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">User Name</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="user_name"
+                                  placeholder="User Name"
+                                  required />                        
+                              </div>
+                            
+                               
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-email">Email</label>
+                                <input
+                                  type="email"
+                                  id="user_email"
+                                  class="form-control"
+                                  placeholder="Email Address"
+                                  required />                               
+                              </div>
+                          
+                              <div class="mb-3 form-password-toggle">
+                                <label class="form-label" for="user_password">Password</label>
+                                <div class="input-group input-group-merge">
+                                  <input
+                                    type="password"
+                                    id="user_password"
+                                    class="form-control"
+                                    placeholder="Password"
+                                    required />
+                                  <span class="input-group-text cursor-pointer" id="basic-default-password4"
+                                    ><i class="bx bx-hide"></i
+                                  ></span>
+                                </div>
+                                
+                              </div>
+
+                            
+                              <div class="row">
+                                <div class="col-12">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </div>
+
+
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+    $(document).ready(function() {
+    $('#user_assesstion_form').submit(function(e) {
+        e.preventDefault();
+
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show loading message
+        const loadingMessageDiv = $('#loadingMessage');
+        loadingMessageDiv.show().text("Submitting...");
+
+        const role_select = $('#role_select').val();
+        const user_id = $('#user_id').val();
+        const user_name = $('#user_name').val();
+        const user_email = $('#user_email').val();
+        const user_password = $('#user_password').val();
+
+        $.ajax({
+            url: '/main/user/add/',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                role_select: role_select,
+                user_id: user_id,
+                user_name: user_name,
+                user_email: user_email,
+                user_password: user_password,
+            }),
+            success: function(response) {
+                loadingMessageDiv.hide();
+                showAlert(`User "${response.user}" created successfully!`, 'success');
+                $('#user_assesstion_form')[0].reset();  
+            },
+            error: function(xhr) {
+                loadingMessageDiv.hide();
+
+                errorMessage = JSON.parse(xhr.responseText).message;
+              
+                showAlert("Error: " + errorMessage, 'danger');
+            }
+        });
+    });
+});
+
+
+  </script>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-msg {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation-duration: 0.6s;
+            position: relative;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide-in {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .slide-in-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">   {{ session.role_name }} /</span> ROI Mapping
+                </h4>
+                <div class="row mb-4">
+                    <div class="col-lg-6 col-md-8 col-sm-12">
+                        <div class="card">
+                          <h5 class="card-header">ROI Mapping</h5>
+                          <div class="card-body">
+                            <form id="role_assessment_form">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="pro-select">Select Project</label>
+                                    <select class="form-control" id="pro-select" name="pro-select" required>
+                                        <option value="" selected disabled>Select Project</option>
+                                        
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="ip_select">Select Camera</label>
+                                    <select
+                                        class="form-control"
+                                        id="ip_select"
+                                        required>
+                                   
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="ip_select">Select Mapping</label>
+                                    <select
+                                        class="form-control"
+                                        id="map_select"
+                                        required>
+                                        <option value="" selected disabled>Select Mapping</option>
+                                        <option value="drawline">Draw Line</option>
+                                        <!-- <option value="polygon">Polygon</option> -->
+                                   
+                                    </select>
+                                </div>
+                                
+
+                                <div class="mb-4" id="line-count">
+                                    
+                                    <label for="orginal_class_id" class="form-label select2-success">Map line id</label>
+                                    <select id="orginal_class_id" name="orginal_class_id[]" class="select2 form-select" multiple="multiple">
+                                        <option value=""></option>
+                                    </select>
+                                </div>
+                                
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+ 
+  <script>
+
+
+$(document).ready(function () {
+
+async function fetchprojects() {
+    try {
+        const response = await fetch('/available_projects');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const kits = await response.json();
+        const kitSelect = $('#pro-select');
+        kits.forEach(kit => {
+            kitSelect.append(new Option(kit.project_name, kit.project_id));
+        });
+    } catch (error) {
+        console.error('There was a problem with the fetch operation:', error);
+    }
+}
+
+fetchprojects();
+
+// Handle project select change
+$('#pro-select').change(function () {
+    const project_id = $(this).val();
+    if (project_id) {
+        fetchCameraIP(project_id);  // Update camera IP based on selected project
+    }
+});
+
+// Handle both project and camera IP change
+$('#pro-select, #ip_select,#map_select').change(function () {
+    const selectedMapping = document.getElementById('map_select').value;
+    const project_id = $('#pro-select').val();
+    const camera_ip = $('#ip_select').val();
+
+    if (project_id && camera_ip && selectedMapping) {
+        fetchLineCount(camera_ip, project_id,selectedMapping);
+    }
+    else{
+        console.log("missing")
+    }
+});
+
+});
+
+// Fetch camera IP for the selected project
+async function fetchCameraIP(project_id) {
+    try {
+        const response = await fetch(`/roi/camera_ip/${project_id}`);
+        if (!response.ok) throw new Error('Failed to fetch camera IP');
+        const data = await response.json();
+        console.log("returned camera_ip:", data);
+
+        const ipSelect = $('#ip_select');
+        ipSelect.empty();
+
+        let cameraIPs;
+
+ 
+        if (typeof data.camera_ip === 'string') {
+            try {
+                cameraIPs = JSON.parse(data.camera_ip);
+            } catch (e) {
+              
+                cameraIPs = [data.camera_ip]; 
+            }
+        } else {
+            cameraIPs = data.camera_ip;
+        }
+
+        if (Array.isArray(cameraIPs)) {
+            cameraIPs.forEach(ip => {
+                ipSelect.append(new Option(ip, ip));
+            });
+
+            if (cameraIPs.length === 1) {
+                ipSelect.val(cameraIPs[0]);
+                ipSelect.prop('readonly', true);
+            } else {
+                ipSelect.prop('readonly', false);
+            }
+        } else {
+            ipSelect.append(new Option(cameraIPs, cameraIPs));
+            ipSelect.val(cameraIPs);
+            ipSelect.prop('readonly', true);
+        }
+
+        ipSelect.trigger('change');
+    } catch (error) {
+        console.error('Error fetching camera IP:', error);
+    }
+}
+
+async function fetchLineCount(camera_ip, project_id, selectedMapping) {
+    console.log('Fetching line count for', camera_ip, project_id);
+    try {
+        const response = await fetch(`/main/line_count/${camera_ip}/${project_id}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        console.log('Received data:', data);
+
+        const lineCountDiv = document.getElementById('line-count');
+        const lineSelect = $('#orginal_class_id');
+
+        lineCountDiv.style.display = 'block';
+        lineSelect.empty();
+        console.log("selected:", selectedMapping);
+
+        if (selectedMapping === 'drawline') {
+            console.log("in drawline");
+
+            data.line_ids.forEach(line_id => {
+                const lineNumber = line_id.split('_')[2];
+                direction_name_lable = ''
+                if (lineNumber == 1){
+                    direction_name_lable = 'UP'
+                }
+                else if (lineNumber == 2){
+                    direction_name_lable = 'DOWN'
+                }
+                else{
+                    direction_name_lable = 'BOTH'
+                }
+                lineSelect.append(new Option(`line${lineNumber} [${direction_name_lable}]`, line_id));
+            });
+
+            console.log("Existing mapping:", data.existing_mapping);
+            const cleanedMapping = data.existing_mapping.map(line => line.replace(/[{}]/g, ''));
+            if (Array.isArray(cleanedMapping)) {
+                lineSelect.val(cleanedMapping).trigger('change');
+            } else {
+                console.warn('Existing mapping is not an array.');
+            }
+
+         } 
+        //else if (selectedMapping === 'polygon') {
+        //     console.log("in polygon");
+        //     lineSelect.empty();
+        //     const polyOptions = data.poly_options || {};
+        //     const directionLabels = { up: "Up", down: "Down" };
+        
+        //     Object.values(polyOptions).forEach(direction => {
+        //         const label = directionLabels[direction] || direction;
+        //         lineSelect.append(new Option(label, direction));
+        //     });
+        
+        //     const existingPolygon = data.existing_polygon;
+        //     if (existingPolygon) {
+        //         const polygonValues = existingPolygon.split(',').map(val => val.trim());
+        //         lineSelect.val(polygonValues).trigger('change');
+        //     }
+        // }
+        
+
+    } catch (error) {
+        console.error('Error fetching line count:', error);
+    }
+}
+
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.roi_status === true) {
+            Toastify({
+                text: data.latest_status.message || "ROI Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+$(document).ready(function () {
+
+    $('#orginal_class_id').select2({
+        placeholder: "Select line id",  
+        allowClear: true 
+    });
+
+    $('#role_assessment_form').submit(function (e) {
+        e.preventDefault();
+
+        // Submit form
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function () {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'block';
+            loadingMessageDiv.innerText = message;
+            loadingMessageDiv.style.color = 'white';
+            loadingMessageDiv.style.backgroundColor = 'blue';
+            loadingMessageDiv.style.padding = '10px';
+            loadingMessageDiv.style.borderRadius = '5px';
+        }
+
+        function hideLoading() {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'none';
+        }
+
+        let orginal_class_id = $('#orginal_class_id').val();
+        const camera_ip = $('#ip_select').val();
+        const project_id = $('#pro-select').val();
+        const selectedMapping = document.getElementById('map_select').value;
+        console.log("original class id:",orginal_class_id)
+
+        showLoading("Submitting...");
+
+        $.ajax({
+            url: '/main/mapping_line/update',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                project_id:project_id,
+                camera_ip:camera_ip,
+                line_id: orginal_class_id,
+                selected:selectedMapping
+            }),
+            success: function (response) {
+                hideLoading();
+                showAlert(`Line values mapped successfully!`, 'success');
+                console.log("Form Submitted Successfully:", response);
+                $('#role_assessment_form')[0].reset();
+                $('#orginal_class_id').val(null).trigger('change');
+            },
+            error: function (xhr) {
+                hideLoading();
+                let errorMessage = 'An unexpected error occurred. Please try again.';
+                if (xhr.status === 400) {
+                    errorMessage = JSON.parse(xhr.responseText).detail;
+                }
+                showAlert("Error: " + errorMessage, 'danger');
+            }
+        });
+    });
+});
+</script>
+</html>

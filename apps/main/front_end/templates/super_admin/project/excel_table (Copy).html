@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                  <span class="text-muted fw-light">{{ session.role_name }} /</span> Hourly Report
+              </h4>
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+
+                
+                <div class="card mt-5">
+                    <h5 class="card-header">Excel Download</h5>
+     
+                    <div class="card-datatable text-nowrap table-responsive">
+                        <table class=" table table-bordered" id="users_table">
+                            <thead>
+                                <tr>
+                                    <th>Detection ID</th>
+                                    <th>Project Name</th>
+                                    <th>Camera IP</th>
+                                    <th>Start Time</th> 
+                                    <th>End Time</th>
+                                    <th>Download</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for interval in hourly_intervals %}
+                                <tr>
+                                    <td>{{ detection_id }}</td>
+                                    <td>{{ project_name }}</td>
+                                    <td>{{ camera_ip }}</td>
+                                    <td>{{ interval.start }}</td>
+                                    <td> {{ interval.end }}</td>
+                                    <td><button type = "submit" class ="btn btn-sm btn-success download-btn" onclick="Downloadexcel('{{ detection_id }}','{{project_id}}','{{interval.start}}','{{interval.end}}', '{{ camera_ip }}','{{line_id}}',this)">Download</button></td>
+                                </tr>
+                                {% endfor %}
+
+                                 
+                            </tbody>
+                        </table>
+                    </div>
+              </div>
+
+
+              
+          </div>
+          <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+                <div id="loading" style="display:none; position: fixed; top: 50%; left: 55%; transform: translate(-50%, -50%); z-index: 1000;">
+                    <div class="col">
+                        <div class="sk-fold sk-primary">
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                        </div>
+                    </div>  
+                </div>
+           
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+     $(document).ready(function() {
+
+$('#users_table').DataTable({
+autoWidth: true, 
+});})
+
+async function Downloadexcel(detection_id, project_id, start, end, camera_ip, line_id, button) {
+    const ip = location.host;
+    console.log('IP Address:', ip);
+    console.log('Project ID:', project_id);
+    console.log('Camera IP:', camera_ip);
+    console.log('Detection ID:', detection_id);
+    console.log('Start Time:', start);
+    console.log('End Time:', end);
+    console.log('Line ID:', line_id);
+
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_').slice(0, 19);
+
+    // Disable all download buttons
+    const allButtons = document.querySelectorAll(".download-btn");
+    allButtons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    loading.style.display = 'inline-block';
+
+    try {
+        const response = await fetch(`/realtime/download_records?project_id=${project_id}&camera_ip=${camera_ip}&detection_id=${detection_id}&ip=${ip}&start_time=${start}&end_time=${end}&line_id=${line_id}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'An error occurred. Please try again later.';
+
+            if (text.includes("No records found")) {
+                errorMessage = "No records found for the selected time range.";
+            } else if (response.status === 404) {
+                errorMessage = "Requested resource not found.";
+            } else if (response.status === 400) {
+                errorMessage = "Bad request. Please check your inputs.";
+            }
+
+            throw new Error(errorMessage);
+        }
+
+        alertHandler("Download initiated!", true);
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const formattedStartTime = start.replace(/-/g, '_');
+        const formattedEndTime = end.replace(/-/g, '_');
+        const fileName = `Realtime_hourly_report_${formattedStartTime}_${timestamp}.xlsx`;
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+    } catch (error) {
+        console.error('Error downloading the report:', error);
+        alertHandler(error.message, false);
+    } finally {
+        loading.style.display = 'none';
+        // Re-enable all buttons after download is complete
+        allButtons.forEach(btn => {
+            btn.disabled = false;
+        });
+    }
+}
+
+function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; // Change class based on success or failure
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+
+    // Append the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // Trigger the slide-in effect
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+
+    // Remove the alert after some time
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+
+        // Remove the alert from the DOM after animation
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); // Duration before the alert starts to fade out
+}
+
+
+
+    
+
+    </script>
+    </html>

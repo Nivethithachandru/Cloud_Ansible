@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+<head>
+    {% include 'header_file.html' %}
+   <!-- <meta http-equiv="refresh" content="30">   -->
+
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<style>
+  .alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+.uptime-heading {
+  font-weight: bold;
+  color: #007bff; /* Example color for the heading text */
+}
+
+.uptime-value {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #ff6347; /* Example background color */
+  font-size: 16px; /* Adjust the font size as needed */
+}
+
+
+.lpu_status {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  background-color: #ff6347; /* Example background color */
+  font-size: 16px; /* Adjust the font size as needed */
+}
+
+
+
+
+
+</style>
+</head>
+<body >
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar" >
+    <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page" id="reload_dashboard">
+            <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+                <div class="container-fluid">
+                  <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                    <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                      <i class="bx bx-menu bx-sm"></i>
+                    </a>
+                  </div>
+    
+                  <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                    
+                    
+    
+                    <ul class="navbar-nav flex-row align-items-center ms-auto">
+
+                      <li class="nav-item me-5 me-xl-5">
+                         <span class="uptime-heading">KIT Status</span>
+                        <span class="badge {% if kit_data.lpu_status %}bg-success{% else %}bg-danger{% endif %}">
+                          {% if kit_data.lpu_status %}Active{% else %}Inactive{% endif %}
+                        </span>
+                      </li>
+                      
+                      <li class="nav-item me-5 me-xl-5">
+                        <span class="uptime-heading">Uptime:</span>
+                        <span class="uptime-value" id="system_uptime">{{ kit_data.system_uptime }}</span>
+                      </li>
+                      
+                      
+
+                      <!-- Style Switcher -->
+                      <li class="nav-item me-2 me-xl-0">
+                        <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
+                          <i class="bx bx-sm"></i>
+                        </a>
+                      </li>
+                      <!--/ Style Switcher -->
+    
+                    </ul>
+                  </div>
+    
+                </div>
+              </nav>
+            <div class="content-wrapper">
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    <h4 class="py-3 breadcrumb-wrapper mb-4">
+                        <span class="text-muted fw-light">MOVABLE /</span> Dashboard
+                    </h4>
+                   
+                      <!-- ############################################### -->
+                      <div class="row">
+
+
+                          <!-- Disk Stats -->
+                          <div class="col-lg-4 col-md-12 mb-4">
+                            <h5>Disk Status</h5>
+                            <div class="row">
+                              
+                             
+                              <!-- Multi Radial Chart  (DISK STATS) -->
+                              <div class="col-12 mb-4">
+                                <div class="card">
+                                  <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0">Disk Status</h5>                                    
+                                  </div>
+                                  <div class="card-body">
+                                    <div id="disk_usage_chart"></div>
+                                  </div>
+                                </div>
+                              </div>
+                              <!--/ Multi Radial Chart -->
+
+
+                              
+                              <!-- Total Disk -->
+
+                              <div class="col-12 mb-4">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                      <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                          <span class="avatar-initial bg-label-default rounded-circle"
+                                            ><i class="fa-solid fa-floppy-disk fs-4">
+                                              </i
+                                          >
+                                        </span>
+                                        </div>
+                                        <div class="card-info">
+                                          <h5 class="card-title mb-0 me-2" id="total_disk_gb_text">{{ kit_data.total_disk_gb }} GB</h5>
+
+                                          <small class="text-muted">Total Disk</small>
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6"id="incomeChart"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              
+
+                              <!-- Used Disk -->
+                              <div class="col-12 mb-4 ">
+                                <div class="caDisk Statsrd card">
+                                  <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                      <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                          <span class="avatar-initial bg-label-warning rounded-circle"
+                                            ><i class="fa-regular fa-hard-drive fs-4"></i
+                                          ></span>
+                                        </div>
+                                        <div class="card-info">
+                                          <h5 class="card-title mb-0 me-2" id="used_disk_gb_text">{{ kit_data.used_disk_gb}}GB</h5>
+                                          <small class="text-muted">Used Disk</small>
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6"id="conversationChart"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              
+                              
+                              <!-- Free Disk -->
+                              <div class="col-12 mb-4">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                      <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                          <span class="avatar-initial bg-label-danger rounded-circle"
+                                            ><i class="fa-solid fa-compact-disc fs-4"></i
+                                          ></span>
+                                        </div>
+                                        <div class="card-info">
+                                          <h5 class="card-title mb-0 me-2"id="free_disk_gb_text">{{ kit_data.free_disk_gb}}GB</h5>
+                                          <small class="text-muted">Free Disk</small>
+                                        </div>
+                                      </div>
+                                      <div class="col-md-6"id="conversationChart1"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                             
+                             
+                            </div>
+                          </div>
+
+                        <!-- CPU Stats -->
+                        <div class="col-lg-4 col-md-12 mb-4">
+
+                          
+                          <h5 class="mb-3">Camera FPS</h5>
+                          <div class="col-12 mb-4">
+                            <div class="card">
+                              <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                  <div class="avatar me-3">
+                                    <span class="avatar-initial bg-label-danger rounded-circle">
+                                      <i class="fa-solid fa-camera fs-4"></i>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h4 class="card-title mb-0" id="camera_fps">
+                                        {{ 'None' if kit_data.camera_fps == 0 else kit_data.camera_fps | int }}
+                                    </h4>
+                                    <small class="text-muted">Frames Per Second</small>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </div>
+
+
+                          
+                          <!-- <div class="col-12 mb-4">
+                            <div class="card">
+                              <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                  <div class="avatar me-3">
+                                    <span class="avatar-initial bg-label-warning rounded-circle">
+                                      <i class="fa-solid fa-wifi fs-4"></i>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <h5 class="card-title mb-0" id="kit_internet">KIT Internet Speed</h5>
+                                    <small class="text-muted">Current Download & Upload Rates</small>
+                                  </div>
+                                </div>
+
+                                <div class="row text-center">
+                                  <div class="col-md-6 mb-2">
+                                    <div class="border rounded py-2">
+                                      <h6 class="mb-1 text-primary">Download Speed</h6>
+                                      <span id="download_speed" class="fs-5 fw-semibold">{{ kit_data.download_speed }} Mbps</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-md-6 mb-2">
+                                    <div class="border rounded py-2">
+                                      <h6 class="mb-1 text-success">Upload Speed</h6>
+                                      <span id="upload_speed" class="fs-5 fw-semibold">{{ kit_data.upload_speed }} Mbps</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                              </div>
+                            </div>
+                          </div> -->
+
+
+
+
+
+                          <h5>CPU Status</h5>
+                          <div class="row">
+                            <!-- CPU Cores -->
+                            
+
+                            <div class="col-12 mb-4">
+                              <div class="card">
+                                <div class="card-body">
+                                  <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                      <div class="avatar">
+                                        <span class="avatar-initial bg-label-default rounded-circle"
+                                          ><i class="fa-solid fa-microchip fs-4"></i
+                                        ></span>
+                                      </div>
+                                      <div class="card-info">
+                                        <h5 class="card-title mb-0 me-2"id="cpu_cores">{{ kit_data.cpu_core }}</h5>
+                                        <small class="text-muted" >Total CPU Cores</small>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6" id="conversationChart2"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- <h5>FAN SPEED</h5> -->
+                            <div class="col-12 mb-4">
+                              <div class="card">
+                                <div class="card-body">
+                                  <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                      <div class="avatar">
+                                        <span class="avatar-initial bg-label-warning rounded-circle"
+                                          ><i class="fa-solid fa-fan fs-4"></i
+                                        ></span>
+                                      </div>
+                                      <div class="card-info">
+                                        <h5 class="card-title mb-0 me-3" id="kit_fan_speed">{{ kit_data.kit_fan_speed }}</h5>
+                                        <small class="text-muted">Kit Fan speed</small>
+                                      </div>
+                                    </div>
+                                    <div class="col-md-6" id="incomeChart2"></div>
+                                  </div>
+                                </div>
+                              </div>                            
+                            </div>
+
+
+                            <!-- CPU Temperature -->
+                            <div class="col-12 col-sm-12 col-md-12 mb-4">
+                              <div class="card h-100">
+                                <div class="card-header">
+                                  <h5 class="card-title mb-0">CPU Temperature</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                  <h3 class="mb-0" id="cpu_temperature">{{ kit_data.cpu_temperature }}°C</h3>
+                                  <div class="progress mt-3" style="height: 20px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 54%;" aria-valuenow="54" aria-valuemin="0" aria-valuemax="100"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                             
+                              <!-- GPU Temperature -->
+                              <div class="col-12 col-sm-12 col-md-12 mb-4">
+                                <div class="card h-100">
+                                  <div class="card-header">
+                                    <h5 class="card-title mb-0">GPU Temperature</h5>
+                                  </div>
+                                  <div class="card-body text-center">
+                                    <h3 class="mb-0"id="gpu_temperature">{{ kit_data.gpu_temperature }}°C</h3>
+                                    <div class="progress mt-3" style="height: 20px;">
+                                      <div class="progress-bar bg-warning" role="progressbar" style="width: 51.5%;" aria-valuenow="51.5" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+
+                            
+
+
+                          </div>
+                        </div>
+                        
+
+                        
+
+
+                        <!-- Memory Stats -->
+                        <div class="col-lg-4 col-md-12 mb-4">
+                          <h5>KIT Details</h5>
+                          <div class="row">
+                            <div class="col-12 mb-4">
+                              <div class="card">
+                                <div class="card-body">
+                                  <ul class="list-unstyled mb-0 ">
+                                    <li class="mb-3">
+                                      <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-start">
+                                          <div class="avatar me-3">
+                                            <div class="avatar">
+                                              <span class="avatar-initial bg-label-primary rounded-circle"><i class="far fa-clock fs-4"></i></span>
+                                            </div>
+                                          </div>
+                                          <div class="me-2">
+                                            <h6 class="mb-0">System Time</h6>
+                                            <small class="text-muted">Running Time</small>
+                                          </div>
+                                        </div>
+                                        <div class="ms-auto">
+                                          <a href="javascript:;" style="color: white;">
+                                            <span class="badge bg-label-warning" id="kit_uptime">
+                                            {{ kit_data.kit_time}}
+                                          </span>
+                                        </a>
+                                        </div>
+                                      </div>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div id="edit-input-container" class="mt-2" style="display: none;">
+                            <input type="number" id="edit-input" class="form-control" value="{{ kit_data.lpu }}">
+                            <button id="submit-edit" class="btn btn-primary mt-2">Submit</button>
+                          </div>
+
+                          <h5>Memory Status</h5>                          
+                          <div class="row">
+                            <!-- Total RAM -->
+                            
+                            <div class="col-12 mb-4">
+                              <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                  <h5 class="card-title mb-0">RAM Status</h5>                                    
+                                </div>
+                                <div class="card-body">
+                                  <div id="ram_usage_chart"></div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                              <div class="card">
+                                <div class="card-body">
+                                  <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                      <div class="avatar">
+                                        <span class="avatar-initial bg-label-danger rounded-circle"
+                                          ><i class="fa-solid fa-memory fs-4"></i
+                                        ></span>
+                                      </div>
+                                      <div class="card-info">
+                                        <h5 class="card-title mb-0 me-2" id="total_ram_gb_text">{{ kit_data.total_ram_gb}}GB</h5>
+                                        <small class="text-muted">Total RAM</small>
+                                      </div>
+                                    </div>
+                                    <div id="conversationChart4"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                              <!-- Used RAM -->
+                              <div class="col-12 mb-4">
+                                <div class="card">
+                                  <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                      <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar">
+                                          <span class="avatar-initial bg-label-default rounded-circle"
+                                            ><i class="fa-solid fa-database fs-4"></i
+                                          ></span>
+                                        </div>
+                                        <div class="card-info">
+                                          <h5 class="card-title mb-0 me-2" id="used_ram_gb_text">{{ kit_data.used_ram_gb}}GB</h5>
+                                          <small class="text-muted">Used RAM</small>
+                                        </div>
+                                      </div>
+                                      <div id="incomeChart3"></div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!--  Usage -->
+                            <div class="col-lg-12 mb-4">
+                              <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                  <h5 class="card-title mb-0">Usages</h5>                                
+                                </div>
+                                <div class="card-body pb-2">
+                                  <div class="d-flex justify-content-around align-items-center flex-wrap mb-4">
+                                    <div class="user-analytics text-center me-2">
+                                      <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+                                      <span>GPU Usage</span>
+                                      <div class="d-flex align-items-center mt-2">
+                                        <div class="chart-report" data-color="success" data-series="{{ kit_data.gpu_usage }}"></div>
+                                        <h3 class="mb-0" id="gpu_usage">{{ kit_data.gpu_usage }}%</h3>
+                                      </div>
+                                    </div>
+                                    <div class="sessions-analytics text-center me-2">
+                                      <i class="fa-solid fa-laptop-code me-1"></i>
+                                      <span>CPU Usage</span>
+                                      <div class="d-flex align-items-center mt-2">
+                                        <div class="chart-report" data-color="warning" data-series="{{ kit_data.cpu_percentage_usage }}"></div>
+                                        <h3 class="mb-0"id="cpu_percentage_usage">{{ kit_data.cpu_percentage_usage }}%</h3>
+                                      </div>
+                                    </div>
+                                    <div class="bounce-rate-analytics text-center">
+                                      <i class="fa-solid fa-memory me-1"></i>
+                                      <span>RAM Usage</span>
+                                      <div class="d-flex align-items-center mt-2">
+                                        <div class="chart-report" data-color="danger" data-series="{{ kit_data.ram_percentage_usage }}"></div>
+                                        <h3 class="mb-0"id="ram_percentage_usage">{{ kit_data.ram_percentage_usage }}%</h3>
+                                      </div>
+                                    </div>
+                                  </div>
+  
+                                </div>
+                              </div>
+                            </div>
+    
+    
+    
+  
+                            </div>
+                          </div>
+                      
+                        
+                        </div>
+                        <div class="layout-overlay layout-menu-toggle"></div>
+                        <div class="drag-target"></div>
+                        <span id="total_disk_gb" style="display: none;">{{ kit_data.total_disk_gb}}</span>
+                        <span id="used_disk_gb" style="display: none;">{{ kit_data.used_disk_gb}}</span>
+                        <span id="free_disk_gb" style="display: none;">{{ kit_data.free_disk_gb}}</span>
+                        <span id="total_ram_gb" style="display: none;">{{ kit_data.total_ram_gb}}</span>
+                        <span id="used_ram_gb" style="display: none;">{{ kit_data.used_ram_gb}}</span>
+                          
+                        <!-- ############################################### -->
+                  </div>
+              </div>
+          </div>
+      </div>
+
+
+                          
+                                      </div> 
+                                       
+                                    </div>
+                                   <!--  <div class="col-md-8" id="conversationChart3"></div> -->
+                                  </div>
+                                </div> 
+                              </div>
+                            </div>
+                          </div>  
+
+                         
+                           
+
+                            <!-- Total RAM -->
+                                                      
+                          
+    <div class="layout-overlay layout-menu-toggle"></div>
+    <div class="drag-target"></div>
+</div>
+{% include 'script_file.html' %}
+<script src="{{ url_for('static', path='assets/js/dashboards-analytics.js') }}"></script>
+<script src="{{ url_for('static', path='assets/js/dashboards-ecommerce.js') }}"></script>
+<script>
+   
+
+
+
+
+  let cardColor, headingColor, labelColor, legendColor, borderColor, shadeColor;
+  
+    if (isDarkStyle) {
+      cardColor = config.colors_dark.cardColor;
+      headingColor = config.colors_dark.headingColor;
+      labelColor = config.colors_dark.textMuted;
+      legendColor = config.colors_dark.bodyColor;
+      borderColor = config.colors_dark.borderColor;
+      shadeColor = 'dark';
+    } else {
+      cardColor = config.colors.cardColor;
+      headingColor = config.colors.headingColor;
+      labelColor = config.colors.textMuted;
+      legendColor = config.colors.bodyColor;
+      borderColor = config.colors.borderColor;
+      shadeColor = 'light';
+    }
+    
+   // Fetch values from DOM and convert to numbers
+  var total_disk_gb = parseFloat(document.getElementById('total_disk_gb').textContent);
+  var used_disk_gb = parseFloat(document.getElementById('used_disk_gb').textContent);
+  var free_disk_gb = parseFloat(document.getElementById('free_disk_gb').textContent);
+
+  
+  
+  var used_disk_percent = (used_disk_gb / total_disk_gb) * 100
+  var free_disk_percent = (free_disk_gb / total_disk_gb) * 100
+
+  console.log("used_disk_percent",used_disk_percent)
+  console.log("free_disk_percent",free_disk_percent)
+  var used_disk_percent = ((used_disk_gb / total_disk_gb) * 100).toFixed(2);
+  var free_disk_percent = ((free_disk_gb / total_disk_gb) * 100).toFixed(2);
+
+  console.log("used_disk_percent",used_disk_percent)
+  console.log("free_disk_percent",free_disk_percent)
+
+  var options = {
+    series: [used_disk_percent, free_disk_percent, 100], // Use percentages
+    chart: {
+      height: 350,
+      type: 'radialBar',
+    },
+    plotOptions: {
+      radialBar: {
+        dataLabels: {
+          name: {
+            fontSize: '22px',
+            color: labelColor, // Set color for the label name
+  
+          },
+          value: {
+            fontSize: '16px',
+            color: labelColor, // Set color for the label name
+  
+          },
+          
+          total: {
+            show: true,
+            label: 'Total',
+            color: headingColor,
+            formatter: function (w) {
+              return total_disk_gb.toFixed(1) + " GB"; // Display disk RAM
+            }
+          }
+        },
+      }
+    },
+    
+    labels: ['Used Disk', 'Free Disk', 'Total Disk'],
+    legend: {
+      show: true,
+      color: headingColor,
+      position: 'bottom',
+      floating: true,
+      labels: {
+        colors: labelColor 
+      },
+    },
+    tooltip: {
+      enabled: true,
+      fillSeriesColor: true,
+      theme: 'dark',
+      x: {
+        show: true
+      },
+      y: {
+        formatter: function(val) {          
+          return val + "%"; 
+  
+        }
+        
+      },
+      
+    }
+  };
+  
+  var chart = new ApexCharts(document.querySelector("#disk_usage_chart"), options);
+  chart.render();
+  
+  
+    // Data for the chart (FOR RAM)
+  
+    var total_ram_gb = parseFloat(document.getElementById('total_ram_gb').textContent);
+    var used_ram_gb = parseFloat(document.getElementById('used_ram_gb').textContent);
+    var free_ram_gb = total_ram_gb - used_ram_gb; 
+  
+    var options = {
+      series: [used_ram_gb, free_ram_gb], 
+      chart: {
+        width: 380,
+        type: 'donut',
+      },
+      plotOptions: {
+        pie: {
+              startAngle: -90,
+              endAngle: 270
+            },
+        radialBar: {
+          dataLabels: {
+            name: {
+              fontSize: '22px',
+              color: labelColor, // Set color for the label name
+            },
+            fill: {
+              type: 'gradient',
+            },
+            value: {
+              fontSize: '22px',
+              color: labelColor, // Set color for the label name
+            },
+            total: {
+              show: true,
+              label: 'Total RAM',
+              color: headingColor,
+        
+              formatter: function (w) {
+                return total_ram_gb.toFixed(2) + " GB"; // Display total RAM
+              }
+            }
+          }
+        }
+      },
+      labels: ['Used RAM', 'Free RAM'],
+  
+      legend: {
+        show: true,
+        color: headingColor,
+        position: 'bottom',
+      
+        labels: {
+          colors: labelColor // Set color for the legend labels
+        },
+       
+      },
+    };
+  
+    var chart = new ApexCharts(document.querySelector("#ram_usage_chart"), options);
+    chart.render();
+  
+  
+  
+  
+  // wave color
+  
+   const chartConfigs = [
+      {
+        id: '#conversationChart1',
+        series: [{ data: [50, 100, 0, 60, 20, 30] }],
+        colors: ['#ff4560'], // Unique color for conversationChart1
+      },
+      {
+        id: '#conversationChart2',
+        series: [{ data: [30, 70, 20, 40, 60, 50] }],
+        colors: ['#00e396'], // Unique color for conversationChart2
+      },
+      {
+        id: '#conversationChart3',
+        series: [{ data: [60, 20, 40, 80, 30, 70] }],
+        colors: ['#008ffb'], // Unique color for conversationChart3
+      },
+      {
+        id: '#conversationChart4',
+        series: [{ data: [50, 100, 0, 60, 20, 30] }],
+        colors: ['#775dd0'], // Unique color for conversationChart4
+      },
+      {
+        id: '#conversationChart5',
+        series: [{ data: [50, 100, 0, 60, 20, 30] }],
+        colors: ['#775dd0'], // Unique color for conversationChart4
+      },
+      {
+        id: '#conversationChart6',
+        series: [{ data: [50, 100, 0, 60, 20, 30] }],
+        colors: ['#bd4000'], // Unique color for conversationChart4
+      },
+      
+      {
+        id: '#incomeChart2',
+        series: [{ data: [40, 60, 20, 50, 70, 30] }],
+        colors: ['#00bfc6'], // Unique color for incomeChart2
+      },
+      {
+        id: '#incomeChart3',
+        series: [{ data: [90, 40, 30, 70, 20, 60] }],
+        colors: ['#f7b84b'], // Unique color for incomeChart3
+      }
+    ];
+  
+    // Function to initialize and render charts
+    function createAndRenderCharts() {
+      chartConfigs.forEach(config => {
+        const chartEl = document.querySelector(config.id);
+        if (chartEl) {
+          const chartConfig = {
+            series: config.series,
+            chart: {
+              height: 40,
+              type: 'line',
+              zoom: { enabled: false },
+              sparkline: { enabled: true },
+              toolbar: { show: false }
+            },
+            dataLabels: { enabled: false },
+            tooltip: { enabled: false },
+            stroke: { curve: 'smooth', width: 3 },
+            grid: {
+              show: false,
+              padding: { top: 5, left: 10, right: 10, bottom: 5 }
+            },
+            colors: config.colors,
+            fill: {
+              type: 'gradient',
+              gradient: {
+                shade: 'light',
+                type: 'horizontal',
+                opacityFrom: 0,
+                opacityTo: 0.9,
+                stops: [0, 30, 70, 100]
+              }
+            },
+            xaxis: {
+              labels: { show: false },
+              axisBorder: { show: false },
+              axisTicks: { show: false }
+            },
+            yaxis: { labels: { show: false } }
+          };
+          const chart = new ApexCharts(chartEl, chartConfig);
+          chart.render();
+        }
+      });
+    }
+  
+    // Create and render charts
+    createAndRenderCharts();
+
+    function formatDate(isoDateString) {
+        var date = new Date(isoDateString);
+        
+        // Extract year, month, day, hours, minutes, and seconds
+        var year = date.getFullYear();
+        var month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+        var day = String(date.getDate()).padStart(2, '0');
+        var hours = String(date.getHours()).padStart(2, '0');
+        var minutes = String(date.getMinutes()).padStart(2, '0');
+        var seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        // Format the date as YYYY-MM-DD HH:MM:SS
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+    function reloadDiv() {
+    $.ajax({
+        url: '/get_refresh_data/', 
+        type: 'GET',
+        success: function(response) {
+            console.log("lpu response", response);
+            
+            var data = Object.values(response)[0]; 
+            
+                        
+            var kit_uptime = data.kit_time;
+            var lpu = data.lpu;
+
+            var totalDiskGb = data.total_disk_gb;
+            var usedDiskGb = data.used_disk_gb;
+            var freeDiskGb = data.free_disk_gb;
+
+            var total_disk_gb_text = data.total_disk_gb;
+            var used_disk_gb_text = data.used_disk_gb;
+            var free_disk_gb_text = data.free_disk_gb;
+
+
+            var totalRamGb = data.total_ram_gb;
+            var usedRamGb = data.used_ram_gb;
+            var kit_fan_speed = data.kit_fan_speed;
+            var cpu_cores = data.cpu_core;
+            var cpu_temperature = data.cpu_temperature;
+            var gpu_temperature = data.gpu_temperature;
+
+            var gpu_usage = data.gpu_usage;
+            var cpu_percentage_usage = data.cpu_percentage_usage;
+            var ram_percentage_usage = data.ram_percentage_usage;
+
+            var used_ram_gb_text = data.used_ram_gb;
+            var total_ram_gb_text = data.total_ram_gb;
+
+            var system_uptime = data.system_uptime;
+
+            var download_speed = data.download_speed
+            var upload_speed = data.upload_speed
+
+            $('#download_speed').html(download_speed);
+            $('#upload_speed').html(upload_speed);
+            
+
+            $('#system_uptime').html(system_uptime);
+
+            $('#kit_uptime').html(formatDate(kit_time));
+
+            $('#used_ram_gb_text').text(used_ram_gb_text + 'GB');
+            $('#total_ram_gb_text').text(total_ram_gb_text + 'GB');
+
+
+            $('#total_disk_gb_text').text(total_disk_gb_text + ' GB');
+            $('#used_disk_gb_text').text(used_disk_gb_text + ' GB');
+            $('#free_disk_gb_text').text(free_disk_gb_text + ' GB');
+            
+            $('#server_id_reload').html(lpu); 
+            $('#total_disk_gb').text(totalDiskGb);
+            $('#used_disk_gb').text(usedDiskGb);
+            $('#free_disk_gb').text(freeDiskGb);
+            $('#total_ram_gb').text(totalRamGb);
+            $('#used_ram_gb').text(usedRamGb);
+            $('#kit_fan_speed').text(kit_fan_speed);
+            $('#cpu_cores').text(cpu_core);
+            $('#cpu_temperature').text(cpu_temperature + '°C');
+            $('#gpu_temperature').text(gpu_temperature + '°C');
+
+            $('#gpu_usage').text(parseFloat(gpu_usage) + '%');
+            $('#cpu_percentage_usage').text(parseFloat(cpu_percentage_usage).toFixed(1) + '%');
+            $('#ram_percentage_usage').text(parseFloat(ram_percentage_usage).toFixed(1) + '%');
+
+            $('.chart-report[data-color="success"]').attr('data-series', gpu_usage);
+            $('.chart-report[data-color="warning"]').attr('data-series', cpu_percentage_usage);
+            $('.chart-report[data-color="danger"]').attr('data-series', ram_percentage_usage);
+            
+          
+
+            console.log('Dashboard Reloading setting interval 5 seconds');
+        },
+        error: function() {
+            console.log('Error loading data.');
+        }
+    });
+}
+
+
+      setInterval(reloadDiv, 10000); 
+
+      function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.kit_status === true) {
+            Toastify({
+                text: data.latest_status.message || "drawline Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 30000);
+
+  </script>
+</body>
+</html>

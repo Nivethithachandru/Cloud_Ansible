@@ -1,0 +1,16 @@
+auto_rickshaw
+bus
+car
+others(earth mover)
+lcv
+Opposite Direction
+Two Wheeler
+multi axle
+Truck_3Axle
+Truck_4Axle
+Truck_6Axle
+tracktor
+tracktor_trailer
+Truck_2Axle
+van
+Eicher

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed" dir="ltr" 
+      data-theme="theme-default" 
+      data-assets-path="{{ url_for('static', path='/assets/') }}" 
+      data-template="vertical-menu-template">
+
+<head>
+  {% include 'header_file.html' %}
+  <style>
+    .video-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .video-frame {
+      width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+    }
+    .video-container button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!--Sidenav Menu -->
+      {% include 'side_nav.html' %}
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        {% include 'header_nav.html' %}
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="py-3 breadcrumb-wrapper mb-4">
+              <span class="text-muted fw-light">{{ session.role_name }} /</span> Live View
+            </h4>
+            <div class="row">
+              <div class="col-12 mb-4">
+
+                <div class="row">
+                  {% if cameras %}
+                  {% for camera in cameras %}
+                  <div class="col-lg-6 col-md-6 col-sm-12 mb-4">
+                  <!-- <div class="col-6 mb-4"> -->
+                    <div class="card">
+                      <h5 class="card-header"> LPU {{ camera.lpu_id }} → Camera {{ camera.id }} →  {{ camera.camera_name }} </h5>
+                      <div class="card-body">
+                        <div class="video-container" id="video-container-{{ camera.id }}">
+                          <img id="video-frame-{{ camera.id }}" class="video-frame" />
+                          <div id="error-message-{{ camera.id }}" class="error-message" >
+                            Unable to load video stream
+                          </div>
+                        <button onclick="toggleFullscreen('video-container-{{ camera.id }}')"   style="width:35px; background-color: black">
+                        <i class="menu-icon tf-icons bx bx-fullscreen toggle-fullscreen-icon" style="background-color: black; color:white"></i></button>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                  {% else %}
+                    <div class="col-12card-header">
+                      <div class="alert alert-warning" role="alert">
+                        Warning! LPU Not Registered
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- / Content -->
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+      <div class="drag-target"></div>
+    </div>
+</body>
+
+{% include 'script_file.html' %}
+
+
+
+<script>
+var WEBSOCKET_CLOUD_URL = "{{ WEBSOCKET_CLOUD_URL }}";
+
+  function startWebSocket(cameraId, lpu_id) {
+    const wsUrl = `wss://${WEBSOCKET_CLOUD_URL}/ws/stream/view/${lpu_id}/${cameraId}/`;
+    const imgElement = document.getElementById(`video-frame-${cameraId}`);
+    const errorElement = document.getElementById(`error-message-${cameraId}`);
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log(`Viewer WebSocket connected for Camera ${cameraId}`);
+      errorElement.style.display = "none";
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.camera_id === cameraId) {
+        imgElement.src = `data:image/jpeg;base64,${data.frame}`;
+      }
+    };
+
+    ws.onerror = () => {
+      console.error(`WebSocket error for Camera ${cameraId}`);
+      errorElement.style.display = "block";
+    };
+
+    ws.onclose = () => {
+      console.log(`Viewer WebSocket closed for Camera ${cameraId}`);
+      errorElement.style.display = "block";
+    };
+
+    // Cleanup on page unload
+    window.addEventListener("beforeunload", () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    });
+  }
+
+  {% for camera in cameras %}
+    startWebSocket({{ camera.id }}, {{ camera.lpu_id }});
+  {% endfor %}
+  
+
+
+function toggleFullscreen(containerId) {
+  const elem = document.getElementById(containerId);
+
+  if (!document.fullscreenElement) {
+    elem.requestFullscreen().catch(err => {
+      alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+    });
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+</script>
+
+
+</html>
+</html>

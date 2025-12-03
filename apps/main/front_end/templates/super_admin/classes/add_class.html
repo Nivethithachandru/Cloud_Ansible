@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+   
+
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+      <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script> 
+
+
+    {% include 'header_file.html' %}
+    <style>
+        .alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">   {{ session.role_name }} /</span> Custom Class Assesments
+                </h4>
+                <div class="row mb-4 ">
+                    <div class="col-lg-6 col-md-8 col-sm-12">
+                        <div class="card">
+                          <h5 class="card-header">Custom Class Group</h5>
+                          <div class="card-body">
+                            <form  id="role_assesstion_form">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+
+                              <div class="mb-3">
+                                <label class="form-label" for="bs-validation-name">Custom Class Name</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  id="custom_class_name"
+                                  placeholder="Class Name"
+                                  required />
+                              </div>
+                            
+                              
+                              <div class="row">
+                                <div class="col-12">
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                              </div>
+
+
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+   
+    $(document).ready(function() {
+    $('#role_assesstion_form').submit(function(e) {
+        e.preventDefault();
+
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(message) {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'block';
+            loadingMessageDiv.innerText = message;
+            loadingMessageDiv.style.color = 'white';
+            loadingMessageDiv.style.backgroundColor = 'blue';
+            loadingMessageDiv.style.padding = '10px';
+            loadingMessageDiv.style.borderRadius = '5px';
+        }
+
+        function hideLoading() {
+            const loadingMessageDiv = document.getElementById('loadingMessage');
+            loadingMessageDiv.style.display = 'none';
+        }
+
+        let custom_class_name = $('#custom_class_name').val();
+
+        showLoading("Submitting...");
+
+        $.ajax({
+            url: '/main/classes/add/',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                custom_class_name: custom_class_name
+            }),
+            success: function(response) {
+                hideLoading();
+                showAlert(`Custom "${response.classes}" created successfully!`, 'success');
+                console.log("Form Submitted Successfully:", response);
+                $('#role_assesstion_form')[0].reset(); 
+                setTimeout(function() {
+                    window.location.href = "/main/view_report/";
+                }, 10);
+            },
+            error: function(xhr) {
+                hideLoading();
+
+                errorMessage = JSON.parse(xhr.responseText).message;
+               
+                showAlert("Error: " + errorMessage, 'danger');
+            }
+        });
+    });
+});
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.custom_status === true) {
+            Toastify({
+                text: data.latest_status.message || "Custom Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+  </script>
+</html>

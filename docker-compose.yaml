@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: cosai
+      POSTGRES_DB: product_test_develop
+    ports:
+      - "5432:5432"
+
+  app:
+    image: movable
+    ports:
+      - "8016:8016"
+    env_file:
+      - .env
+    environment:
+      HOSTDB_URL: postgresql://postgres:cosai@db/product_test_develop
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    ports: 
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+    - app

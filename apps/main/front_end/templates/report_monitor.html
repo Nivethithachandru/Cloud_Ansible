@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed" dir="ltr" 
+      data-theme="theme-default" 
+      data-assets-path="{{ url_for('static', path='/assets/') }}" 
+      data-template="vertical-menu-template">
+
+<head>
+  {% include 'header_file.html' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+ 
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">   
+      {% include 'side_nav.html' %}
+      <div class="layout-page">
+        {% include 'header_nav.html' %}
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="py-3 mb-0">  <span class="text-muted fw-light">{{ session.role_name }} /</span> Report Monitoring </h4>
+                <button id="downloadReport" class="btn btn-primary">Download Report</button>
+            </div>
+            
+
+
+            <div class="row" id="reportContent">
+
+                  <div class="row mb-4">
+                    <div class="col-md-2">
+                        <h5>Project Name: <span class="fw-normal">{{ project_name }}</span></h5>
+                    </div>
+                    <div class="col-md-2">
+                        <h5>Detection ID: <span class="fw-normal">{{ detection_id }}</span></h5>
+                    </div>
+                    <div class="col-md-3">
+                        <h5>Start Time: <span class="fw-normal">{{ start_time }}</span></h5>
+                    </div>
+                    <div class="col-md-3">
+                        <h5>End Time: <span class="fw-normal">{{ end_time }}</span></h5>
+                    </div>
+                    <div class="col-md-2">
+                        <h5>Line ID: <span class="fw-normal">{{ line_id }}</span></h5>
+                    </div>
+                </div>
+                
+                <div class="col-lg-12">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card h-100">
+                                <div class="card-body d-flex flex-column justify-content-center ">
+                                    <h5 class="mb-3">Vehicle Class Distribution</h5>
+                                    <canvas id="vehiclePieChart" style="max-height:300px; max-width:100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-12">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                <h5 class="fw-normal mb-3">Total Vehicles: <b>{{ total_vehicle_count }}</b></h5>
+                                <div class="row">
+                                    <!-- Left column -->
+                                    <div class="col-6">
+                                        <table class="table table-sm table-bordered text-center">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Class</th>
+                                                    <th>Count</th>
+                                                    <th>%</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for item in class_results[0:((class_results|length)//2 + (class_results|length)%2)] %}
+                                                <tr>
+                                                    <td>
+                                                        {% if item.class_name == "Opposite Direction" %}
+                                                            Opposite
+                                                        {% elif item.class_name == "others(earth mover)" %}
+                                                            Other
+                                                        {% else %}
+                                                            {{ item.class_name }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ item.count }}</td>
+                                                    <td>{{ item.percentage }}%</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Right column -->
+                                    <div class="col-6">
+                                        <table class="table table-sm table-bordered text-center">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Class</th>
+                                                    <th>Count</th>
+                                                    <th>%</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            {% for item in class_results[((class_results|length)//2 + (class_results|length)%2):] %}
+                                                <tr>
+                                                    <td>
+                                                        {% if item.class_name == "Opposite Direction" %}
+                                                            Opposite
+                                                        {% elif item.class_name == "others(earth mover)" %}
+                                                            Other
+                                                        {% else %}
+                                                            {{ item.class_name }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ item.count }}</td>
+                                                    <td>{{ item.percentage }}%</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mt-4">
+                    <!-- Hourly Bar Chart -->
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="mb-3">Hourly Traffic</h5>
+                                <canvas id="hourlyChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Bar Chart -->
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="mb-3">Daily Traffic</h5>
+                                <canvas id="dailyChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Bar Chart -->
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="mb-3">Weekly Traffic</h5>
+                                <canvas id="weeklyChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                   <!-- Weekly Class Bar Chart -->
+
+                    <div class="col-lg-6 col-md-12 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="mb-3">Weekly With Class Traffic</h5>
+                                <canvas id="weeklyClassChart" style="height:300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+ 
+                </div>
+
+               <!-- ===============================
+                Peak Traffic Analysis Charts
+                =============================== -->
+                
+                <div id="peakSection" class="row mt-4">
+                    <div class="col-lg-12">
+                        <div class="card">
+                        <div class="card-body">
+                            
+                            <h5 class="mb-3"> Peak Traffic Analysis</h5>
+                            <p class="text-muted small">Visual representation of traffic peaks by hour, day, week, month, and year.</p>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6>Peak Traffic per Hour</h6>  
+                                    <ul>
+                                        {% for day, peak in peak_hours_per_day.items() %}
+                                            <li>{{ day }}: {{ peak.hour }} → {{ peak.count }} vehicles</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6 ">
+                                    <h6>Peak Traffic Summary</h6>
+                                    <ul>
+                                        <li>Peak Day of Week: {{ peak_day_of_week.weekday }} → {{ peak_day_of_week.count }} vehicles</li>
+                                        <li>Peak Day of Month: {{ peak_day_of_month.day }} → {{ peak_day_of_month.count }} vehicles</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            
+                            
+
+                            <!-- Tabs for time range -->
+                            <ul class="nav nav-tabs mb-3" id="peakTrafficTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-bs-toggle="tab" href="#hourly" role="tab">Hourly</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#daily" role="tab">Daily</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#weekly" role="tab">Weekly</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#monthly" role="tab">Monthly</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-bs-toggle="tab" href="#yearly" role="tab">Yearly</a>
+                            </li>
+                            </ul>
+
+                            <div class="tab-content">
+                            <div class="tab-pane fade show active" id="hourly" role="tabpanel">
+                                <canvas id="hourlyPeakChart"  ></canvas>
+                            </div>
+                            <div class="tab-pane fade" id="daily" role="tabpanel">
+                                <canvas id="dailyPeakChart"  ></canvas>
+                            </div>
+                            <div class="tab-pane fade" id="weekly" role="tabpanel">
+                                <canvas id="weeklyPeakChart" ></canvas>
+                            </div>
+                            <div class="tab-pane fade" id="monthly" role="tabpanel">
+                                <canvas id="monthlyPeakChart" ></canvas>
+                            </div>
+                            <div class="tab-pane fade" id="yearly" role="tabpanel">
+                                <canvas id="yearlyPeakChart"></canvas>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+
+          </div>
+          <div class="content-backdrop fade"></div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+      <div class="drag-target"></div>
+    </div>
+</body>
+
+{% include 'script_file.html' %}
+
+ 
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Replace these with your FastAPI variables from backend
+    const hourlyData = {{ hourly_peak_data | tojson }};
+    const dailyData = {{ daily_peak_data | tojson }};
+    const weeklyData = {{ weekly_peak_data | tojson }};
+    const monthlyData = {{ monthly_peak_data | tojson }};
+    const yearlyData = {{ yearly_peak_data | tojson }};
+
+    // Helper function to create chart
+    function createChart(ctx, type, labels, data, label, color) {
+        new Chart(ctx, {
+        type: type,
+        data: {
+            labels: labels,
+            datasets: [{
+            label: label,
+            data: data,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 1,
+            fill: false,
+            tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+        });
+    }
+
+    // Hourly Chart
+    createChart(
+        document.getElementById("hourlyPeakChart"),
+        "bar",
+        hourlyData.hours,
+        hourlyData.counts,
+        "Vehicles per Hour",
+        "rgba(75, 192, 192, 0.8)"
+    );
+
+    // Daily Chart
+    createChart(
+        document.getElementById("dailyPeakChart"),
+        "line",
+        dailyData.days,
+        dailyData.counts,
+        "Vehicles per Day",
+        "rgba(54, 162, 235, 0.8)"
+    );
+
+    // Weekly Chart
+    createChart(
+        document.getElementById("weeklyPeakChart"),
+        "bar",
+        weeklyData.weeks,
+        weeklyData.counts,
+        "Vehicles per Week",
+        "rgba(255, 206, 86, 0.8)"
+    );
+
+    // Monthly Chart
+    createChart(
+        document.getElementById("monthlyPeakChart"),
+        "line",
+        monthlyData.days,
+        monthlyData.counts,
+        "Vehicles per Day (Month)",
+        "rgba(255, 99, 132, 0.8)"
+    );
+
+    // Yearly Chart
+    createChart(
+        document.getElementById("yearlyPeakChart"),
+        "bar",
+        yearlyData.months,
+        yearlyData.counts,
+        "Vehicles per Month (Year)",
+        "rgba(153, 102, 255, 0.8)"
+    );
+    });
+
+    // ---------------------------
+    // Data from backend
+    // ---------------------------
+    const hourlyLabels = {{ hourly_counts | map(attribute="hour_label") | list | default([]) | tojson }};
+    const hourlyData   = {{ hourly_counts | map(attribute="count") | list | default([]) | tojson }};
+
+    const dailyLabels = {{ daily_counts | map(attribute="day_label") | list | default([]) | tojson }};
+    const dailyData   = {{ daily_counts | map(attribute="count") | list | default([]) | tojson }};
+
+    const weeklyLabels = {{ weekly_counts | map(attribute="weekday_label") | list | default([]) | tojson }};
+    const weeklyData   = {{ weekly_counts | map(attribute="count") | list | default([]) | tojson }};
+
+    const classNames = {{ class_names | default([]) | tojson }};
+    const weeklyClassData = {{ weekly_data | default({}) | tojson }};
+
+    const pieLabels = {{ class_results | map(attribute="class_name") | list | default([]) | tojson }};
+    const pieData   = {{ class_results | map(attribute="count") | list | default([]) | tojson }};
+
+    
+    // ---------------------------
+    // Vehicle Class Pie Chart
+    // ---------------------------
+    new Chart(document.getElementById('vehiclePieChart'), {
+        type: 'pie',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieData,
+                backgroundColor: [
+                    '#007bff','#28a745','#dc3545','#ffc107',
+                    '#17a2b8','#6f42c1','#fd7e14','#20c997',
+                    '#6610f2','#e83e8c'
+                ]
+            }]
+        }
+    });
+
+    // ---------------------------
+    // Hourly Traffic Chart
+    // ---------------------------
+    new Chart(document.getElementById('hourlyChart'), {
+        type: 'bar',
+        data: {
+            labels: hourlyLabels,
+            datasets: [{
+                label: 'Vehicles',
+                data: hourlyData,
+                backgroundColor: '#007bff'
+            }]
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Hour' } },
+                y:  {
+                    title: { display: true, text: 'Vehicle Count' },
+                    beginAtZero: true,
+                    max: 10000,   
+                    ticks: { stepSize: 200 },
+                    }
+            }
+        }
+    });
+
+    // ---------------------------
+    // Daily Traffic Chart
+    // ---------------------------
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: {
+            labels: dailyLabels,
+            datasets: [{
+                label: 'Vehicles',
+                data: dailyData,
+                backgroundColor: '#28a745'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { title: { display: true, text: 'Date' } },
+                y: { title: { display: true, text: 'Vehicle Count' }, beginAtZero: true }
+            }
+        }
+    });
+
+    // ---------------------------
+    // Weekly Traffic Chart
+    // ---------------------------
+    new Chart(document.getElementById('weeklyChart'), {
+        type: 'bar',
+        data: {
+            labels: weeklyLabels,
+            datasets: [{
+                label: 'Vehicles',
+                data: weeklyData,
+                backgroundColor: '#ffc107'
+            }]
+        },
+        options: {
+            scales: {
+                x: { title: { display: true, text: 'Day of Week' } },
+                y: { title: { display: true, text: 'Vehicle Count' }, beginAtZero: true }
+            }
+        }
+    });
+
+    // ---------------------------
+    // Weekly Class Breakdown Chart
+    // ---------------------------
+    const weeklyClassDatasets = [
+        {% for cls in class_names %}
+        {
+            label: '{{ cls }}',
+            data: {{ weekly_data[cls] | default([]) | tojson }},
+            backgroundColor: '{{ ["#4caf50","#f44336","#2196f3","#ff9800","#9c27b0","#00bcd4","#e91e63","#ffeb3b","#795548","#607d8b"][loop.index0 % 10] }}'
+        },
+        {% endfor %}
+    ];
+
+    new Chart(document.getElementById('weeklyClassChart'), {
+        type: 'bar',
+        data: {
+            labels: weeklyLabels,
+            datasets: weeklyClassDatasets
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: {
+                x: { title: { display: true, text: 'Day of Week' }, stacked: true },
+                y: { title: { display: true, text: 'Vehicle Count' }, beginAtZero: true, stacked: true }
+            }
+        }
+    });
+
+    // ---------------------------
+    // Download Full Report (PDF)
+    // ---------------------------
+document.getElementById("downloadReport").addEventListener("click", async function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF("p", "pt", "a4");
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = doc.internal.pageSize.getHeight();
+
+    // Hide peak section for first capture
+    const peakSection = document.getElementById("peakSection");
+    peakSection.style.display = "none";
+
+    // Capture main content (without peak section)
+    const reportCanvas = await html2canvas(document.getElementById("reportContent"), { scale: 2, useCORS: true });
+    const reportImg = reportCanvas.toDataURL("image/png");
+    const reportImgHeight = (reportCanvas.height * pdfWidth) / reportCanvas.width;
+    doc.addImage(reportImg, "PNG", 0, 0, pdfWidth, reportImgHeight);
+
+    // Restore peak section
+    peakSection.style.display = "block";
+
+    // Add new page for Peak Traffic
+    doc.addPage();
+    const peakCanvas = await html2canvas(peakSection, { scale: 2, useCORS: true });
+    const peakImg = peakCanvas.toDataURL("image/png");
+    const peakImgHeight = (peakCanvas.height * pdfWidth) / peakCanvas.width;
+    doc.addImage(peakImg, "PNG", 0, 0, pdfWidth, peakImgHeight);
+
+    doc.save("traffic_report_full.pdf");
+});
+</script>
+
+
+</html>

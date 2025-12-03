@@ -1,0 +1,20 @@
+---
+- name: Deploy Cloud_movable (Files already on remote)
+  hosts: ansible_client
+  become: yes
+  vars:
+    remote_project_path: "/home/ubuntu/Cloud_movable"
+
+  tasks:
+     
+    - name: Build Docker image manually
+      command: docker build -t movable .
+      args:
+        chdir: "{{ remote_project_path }}"
+      become: yes
+    
+    - name: Build Docker compose
+      command: docker-compose up -d
+      args:
+        chdir: "{{ remote_project_path }}"
+      become: yes

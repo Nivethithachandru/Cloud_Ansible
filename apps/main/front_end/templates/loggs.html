@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    
+    <style>
+        .terminal {
+            /* background: rgba(56, 4, 40, .9); */
+            color: #d3d7cf;
+            font-family: monospace; 
+            margin-top: -1px;
+            padding-top: 2px;  
+            padding: 20px;      
+            border-radius: 5px;
+            overflow: auto;
+            width: 100%;
+            height: 500px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            white-space: pre-wrap; 
+        }    
+    </style>
+
+  </head>
+  
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          {% include 'header_nav.html' %}
+
+           
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                <span class="text-muted fw-light">{{ session.role_name }} /</span> Logs Management
+              </h4>
+
+              <!-- Ajax Sourced Server-side -->
+              <div class="card ">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-header mb-0">Activity Logs</h5>
+                        <div class="d-flex align-items-center">
+                            <button id="clearLogBtn" style="display: none;" class="btn btn-danger me-2">Clear Log</button>
+            
+    <div class=" me-2">                
+        <input type="text" id="from_date" name="from_date" class="form-control dob-picker" placeholder="From-Date" />                                                          
+    </div>
+
+    <div class="me-2">
+        <input type="text" id="to_date" name="to_date" class="form-control dob-picker" placeholder="To-Date" />                                                                    
+    </div>
+    
+    <div class="btn-group me-2" id="dropdown-icon-demo">
+        <button type="button" class="btn dropdown-toggle btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bx bx-video me-1"></i> <span class="selected">Select Action log</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end dropdown">
+            <li class="dropdown-item d-flex align-items-center btn-section-block-custom" data-action="kit">Kit</li>
+            <li class="dropdown-item d-flex align-items-center btn-section-block-custom" data-action="camera">Camera</li>
+            <li class="dropdown-item d-flex align-items-center btn-section-block-custom" data-action="audit">Audit</li>
+            <li class="dropdown-item d-flex align-items-center btn-section-block-custom" data-action="report">Report</li>
+            <li class="dropdown-item d-flex align-items-center btn-section-block-custom" data-action="roles">Roles</li>
+        </ul>                                 
+    </div>
+
+            
+                        </div>
+                    </div>
+                    <div class="terminal mt-3 list-group-item-dark" id="logContent">Select the action and get the log ...</div>
+                </div>
+              </div>
+                <!-- Ajax Sourced Server-side -->
+                
+
+
+
+
+
+
+              
+             
+            </div>
+            
+            </div>
+          
+            <div class="content-backdrop fade"></div>
+          </div>
+  
+        </div>
+ 
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+   {% include 'script_file.html' %}
+
+  </body>
+  <script src="{{ url_for('static', path='assets/js/form-layouts.js') }}"></script>
+
+  <script>
+    
+
+    $('#from_date').on('change', function() {
+        const fromDate = $(this).val();
+        if (fromDate) {
+            const dateParts = fromDate.split('-'); 
+            const year = parseInt(dateParts[0], 10);
+            const month = parseInt(dateParts[1], 10) - 1; 
+            const day = parseInt(dateParts[2], 10);
+            const nextDate = new Date(year, month, day + 6);            
+            const nextDateFormatted = nextDate.toISOString().split('T')[0];
+            $('#to_date').val(nextDateFormatted);
+        }
+    });
+
+
+
+
+
+
+   $(document).ready(function() {
+    
+    $('.dropdown-item').click(function() {
+        const action = $(this).data('action').trim(); // Remove extra spaces
+        $('.selected').text($(this).text().trim());  // Remove extra spaces if necessary
+        fetchLogs(action); 
+    });
+    
+    function getUniqueAction(action) {
+        const length = action.length;
+    
+       
+        for (let i = 1; i <= length / 2; i++) {
+            const pattern = action.slice(0, i);
+            if (pattern.repeat(length / i).startsWith(action)) {
+                return pattern;
+            }
+        }
+        return action;  
+    }
+
+    $('#clearLogBtn').on('click', function() {
+        var action = $('.selected').text().trim().toLowerCase(); // Trim to remove any unintended spaces
+        action = getUniqueAction(action);
+        if (confirm(`Are you sure you want to clear the ${action} logs?`)) {
+            $.ajax({
+                url: `/main/logs/clear_logs/${action}`,
+                method: 'POST',
+                success: function(response) {
+                    $('#logContent').html(response.message);  
+                    $('#clearLogBtn').hide(); 
+                },
+                error: function(xhr, status, error) {
+                    $('#logContent').html('Error clearing logs.');
+                    console.error('Error:', error);
+                }
+            });
+        }
+    });
+});
+
+function fetchLogs(action) {
+       const logContent = $('#logContent');
+       logContent.html('Loading logs...');  
+
+       const fromDate = $('#from_date').val();
+       const toDate = $('#to_date').val();
+
+       $.ajax({
+           url: `/main/logs/get_logs/${action}`,
+           method: 'GET',
+           data: { 
+               from_date: fromDate,
+               to_date: toDate
+           },
+           success: function(data) {
+               if (data.message) {
+                   logContent.html(data.message); 
+                   $('#clearLogBtn').hide();  
+               } else {
+                   logContent.html(data.logs); 
+                   $('#clearLogBtn').hide();   
+                //    $('#clearLogBtn').show();   
+               }
+           },
+           error: function(xhr, status, error) {
+               logContent.html('Error fetching logs.');
+               console.error('Error:', error);
+           }
+       });
+   }
+
+</script>
+</html>

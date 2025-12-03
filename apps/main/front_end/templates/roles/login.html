@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+  </head>
+    <body>
+        <!-- Content -->
+    
+        <div class="authentication-wrapper authentication-cover">
+          <div class="authentication-inner row m-0">
+            <!-- /Left Text -->
+            <div class="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center">
+              <div class="flex-row text-center mx-auto">
+                <img
+                  src="{{ url_for('static', path='assets/img/pages/login-light.png') }}"
+                  alt="Auth Cover Bg color"
+                  width="520"
+                  class="img-fluid authentication-cover-img"
+                  data-app-light-img="pages/login-light.png"
+                  data-app-dark-img="pages/login-dark.png" />
+                <div class="mx-auto">
+                  <h3>Discover the powerful super admin template ??</h3>
+                 
+                    <p class="demo  mb-0 fw-bold">Powered by COS AI 
+                    <img src="{{ url_for('static', path='assets/img/cosai.png') }}" width="20px" >                    
+                  </p>
+
+                  
+
+                </div>
+              </div>
+            </div>
+            <!-- /Left Text -->
+    
+            <!-- Login -->
+            <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg p-sm-5 p-4">
+              <div class="w-px-400 mx-auto">
+                <!-- Logo -->
+                <div class="app-brand mb-4">
+                  <a href="#" class="app-brand-link gap-2 mb-2">
+                    <!-- <img src="{{ url_for('static', path='assets/img/cosai.png') }}" width="50" height="55"> -->
+                    <!-- <span class="text-primary  demo h2 mb-0 fw-bold">MOVABLE </span> -->
+                  </a>
+                </div>
+                <img src="{{ url_for('static', path='assets/site_logo/sesha_logo.png') }}" 
+     alt="Logo" 
+     width="150" 
+     height="auto" 
+     class="d-block mx-auto mb-3" />
+                <!-- /Logo -->
+                <h4 class="mb-2">Sign In</h4>
+                <p class="mb-4">Enter your details below.</p>
+                
+                
+                 <!-- Error Message Display -->
+                 {% if error %}
+                      <div class="alert alert-danger" role="alert" id="errorAlert">{{ error }}</div>
+                  {% endif %}
+                  {% if success %}
+                      <div class="alert alert-success" role="alert" id="successAlert">{{ success }}</div>
+                  {% endif %}
+
+            <!-- Login Form -->
+            <form id="formAuthentication" action="/roles/auth/login/" method="POST">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="email"
+        value="superadmin@gmail.com"
+                     name="email" placeholder="Enter your email"  autofocus>
+                </div>
+                
+                <div class="mb-3 form-password-toggle">
+                  <label class="form-label" for="password">Password</label>
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      name="password" 
+                      class="form-control"
+                      value="superadmin123"
+                        maxlength="20"
+                      placeholder="············"
+                       />
+                    <span class="input-group-text cursor-pointer" id="basic-default-password4"
+                      ><i class="bx bx-hide"></i
+                    ></span>
+                  </div>                  
+                </div>
+
+                <input type="submit" class="btn btn-primary d-grid w-100" value="Sign In">
+ 
+                 
+
+            </form>
+            
+
+
+             
+              
+              </div>
+            </div>
+            <!-- /Login -->
+            
+          </div>
+        </div>
+        
+  
+
+     {% include 'script_file.html' %}
+     <script>
+      
+      setTimeout(function() {
+          var errorAlert = document.getElementById('errorAlert');
+          var successAlert = document.getElementById('successAlert');
+          if (errorAlert) {
+              errorAlert.style.display = 'none';
+          }
+          if (successAlert) {
+              successAlert.style.display = 'none';
+          }
+      }, 5000); 
+  </script>
+  </body>
+</html>

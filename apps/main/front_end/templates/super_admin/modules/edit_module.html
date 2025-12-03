@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+ 
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> Module Assesments
+                </h4>
+                <div class="row mb-4 col-6">
+                    <div class="col-md">
+                      <div class="card">
+                        <h5 class="card-header">Update Module Group</h5>
+                        <div class="card-body">
+                            
+                            {% if message %}
+                                <div class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                            
+                            <form id="role_assesstion_update" action="/main/modules/update/{{ module.id }}" method="post">
+                                <div class="mb-3">
+                                    <label class="form-label" for="module_name">Module Name</label>
+                                    <input type="text" class="form-control" id="module_name" name="module_name" value="{{ module.module_name }}" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="module_bio">Module Bio</label>
+                                    <textarea class="form-control" id="module_bio" name="module_bio" rows="3" required>{{ module.module_bio }}</textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+ 
+</html>

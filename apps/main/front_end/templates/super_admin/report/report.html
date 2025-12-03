@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+ <style>
+  .alert-msg {
+    background-color: #f44336; /* Red */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    animation-duration: 0.6s;
+    position: relative;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-in {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.slide-in-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out-active {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.alert-success {
+  background-color: #4CAF50; 
+}
+
+ </style>
+  </head>
+  
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          {% include 'header_nav.html' %}
+
+           
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                <span class="text-muted fw-light"> {{ session.role_name }} /</span> Audit
+              </h4>
+
+
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+              <div id="loading" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+                  <div class="col">
+                      <div class="sk-fold sk-primary">
+                          <div class="sk-fold-cube"></div>
+                          <div class="sk-fold-cube"></div>
+                          <div class="sk-fold-cube"></div>
+                          <div class="sk-fold-cube"></div>
+                      </div>
+                  </div>  
+              </div>
+
+             
+              {% if session.role_id == 0 or page_permission %}
+              <div class="card mt-5">
+                <h5 class="card-header">Fetch Data</h5>                  
+                <div class="card-body">     
+                  <div class="row col-12">
+
+                    
+
+                        <div class="col-md-3 mb-3">
+                            <label for="kit-select">Select Project</label>
+                            <select id="kit-select" class="form-select">
+                                <option value="" >Select Project</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="cam-select">Select Camera</label>
+                            <select id="cam-select" class="form-select">
+                                <option value="" disabled>Select Camera</option>
+                            </select>
+                        </div>
+
+                    
+                      <div class="col-md-3 mb-3">
+
+                      <label for="from_date">From Date</label>
+                        <input
+                          type="text"
+                          id="from_date"
+                          name="from_date"
+                          class="form-control dob-picker"
+                          placeholder="YYYY-MM-DD" />
+
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                      <label for="to_date">To Date</label>
+                        <input
+                          type="text"
+                          id="to_date"
+                          name="to_date"
+                          disabled
+                          class="form-control dob-picker"
+                          placeholder="YYYY-MM-DD" />
+                    </div>
+
+                    <div class="pt-5 text-center">
+                        <button type="submit" id="submitBtn"class="btn btn-primary  me-sm-3 me-1">Submit</button>
+                    </div>
+
+                  </div>                                        
+                </div>
+              </div>
+              <div class="card mt-5">
+                 <h5 class="card-header">Audit Report</h5>
+                  <div class="card-datatable  table-responsive">
+                      <table class=" table table-bordered" id="reporttable"style="width: 100%;">
+                          <thead>
+                              <tr>
+                                <th >Vehicle ID</th>
+                                <th >AI Class</th>
+                                <th >Vehicle Grouped</th>
+                                <th >Audited Class</th>
+                                <th > Direction</th>
+                                <th >Image</th>
+                                <th >Date & Time</th>
+                                <!-- <th >Last Modified By</th> -->
+                                <th >Edit</th>                                
+                              </tr>
+                          </thead>
+                          <tbody>
+                              
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+              {% else %}
+                <div class=" h-100">
+                  <div class="card-header">
+                      <div class="alert alert-danger" role="alert">
+                          Access Denied: You do not have the necessary permissions to view this page.
+                      </div>
+                  </div>
+              </div>                   
+              {% endif %}
+
+                
+ <!-- Modal for Zooming Image -->
+<div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageZoomModalLabel">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="zoomedImage" src="" alt="Zoomed Image" style="width: 100%; max-height: 80vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+                 
+
+
+
+          <div class="modal fade" id="auditClassModal" tabindex="-1" aria-labelledby="auditClassModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="auditClassModalLabel">Edit Audit Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editAuditClassForm">
+
+                          <div class="mb-3">
+                              <label for="ai_classname" class="form-label">AI Class Name</label>
+                              <input type="text" id="ai_classname" name="ai_classname" class="form-control" value="" disabled />
+                          </div>
+                          
+                            <div class="mb-3">
+                                  <label for="audited_class" class="form-label">Select Audit Class</label>
+                                  <select id="audited_class" class="selectpicker w-100" data-style="btn-default">
+                                    <option value="" disabled selected>Select Class</option>
+                                    {% for class in custom_classes %}
+                                        <option class="class-option" value="{{ class.id }}" disabled>
+                                            Class: {{ class.custom_class_name.replace('_', ' ') | upper }}
+                                        </option>
+                                        <div class="model-options">
+                                            {% for model in class.model_classes %}
+                                                <option class="model-option" value="{{ model.id }}">
+                                                    &nbsp;&nbsp;&nbsp; {{ model.name.capitalize().replace('_', ' ') }}
+                                                </option>
+                                            {% endfor %}
+                                        </div>                                        
+                                    {% endfor %}
+                                    
+                                     
+                                    <div class="model-options">                                                                               
+                                        <option class="class-option" value="0">Auto Rickshaw  </option>    
+                                        <option class="class-option" value="2">Car  </option>   
+                                        <option class="class-option" value="4">lcv  </option>   
+                                        <option class="class-option" value="5">Opposite Direction </option>   
+                                        <option class="class-option" value="6">Two Wheeler  </option>   
+                                        <option class="class-option" value="11">Tracktor </option>                                                                                   
+                                        <option class="class-option" value="12">Tracktor Trailer  </option>   
+                                        <option class="class-option" value="14">Van  </option>   
+                                    </div>   
+
+                                </select>                             
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="saveAuditClass">Save</button>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+            
+       
+              
+            </div>
+            
+            </div>
+          
+            <div class="content-backdrop fade"></div>
+          </div>
+  
+        </div>
+ 
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+   {% include 'script_file.html' %}
+
+  </body>
+   
+
+  <script src="{{ url_for('static', path='assets/js/form-layouts.js') }}"></script>
+
+<script>
+
+  
+
+let table;   
+const AUDIT_DATE_FILTER ={{ AUDIT_DATE_FILTER }}
+
+document.addEventListener('DOMContentLoaded', function () {
+    fetchAuditData();
+});
+
+
+
+$(document).ready(function() {
+    async function fetchCameras(project_id) {
+        try {
+            const response = await fetch(`/get_cameraip/${project_id}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const cameras = await response.json();
+            const camSelect = $('#cam-select');
+            
+            camSelect.empty();
+            camSelect.append(new Option('Select Camera', '', true, true));
+
+            cameras.forEach(camera => {
+                // If camera.camera_ip is a stringified array or a single IP, parse it
+                let cameraIps;
+                try {
+                    cameraIps = JSON.parse(camera.camera_ip); // Parse stringified array
+                } catch (e) {
+                    cameraIps = [camera.camera_ip]; // Fallback to single IP if parsing fails
+                }
+
+            
+                cameraIps.forEach(ip => {
+                    camSelect.append(new Option(ip, ip));
+                });
+            });
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+
+
+    async function fetchKits() {
+        try {
+            const response = await fetch('/available_projects');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const kits = await response.json();
+            const kitSelect = $('#kit-select');
+            kits.forEach(kit => {
+                kitSelect.append(new Option(kit.project_name, kit.project_id));
+            });
+
+        
+            kitSelect.on('change', function() {
+                const selectedProjectId = $(this).val();
+                if (selectedProjectId) {
+                    fetchCameras(selectedProjectId);
+                }
+            });
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
+
+    fetchKits();
+
+    $(document).on('click', '.table-image', function() {
+        const imageUrl = $(this).data('image');
+        const aiClass = $(this).data('ai-class');
+        const auditClass = $(this).data('audit-class');     
+        const modalTitle = auditClass ? auditClass : aiClass;    
+        $('#zoomedImage').attr('src', imageUrl);     
+        $('#imageZoomModalLabel').text(modalTitle);   
+        $('#imageZoomModal').modal('show');          
+    });
+    
+
+    $('#from_date').on('change', function() {
+        const fromDate = $(this).val();
+        if (fromDate) {
+            const dateParts = fromDate.split('-'); 
+            const year = parseInt(dateParts[0], 10);
+            const month = parseInt(dateParts[1], 10) - 1; 
+            const day = parseInt(dateParts[2], 10);
+            const nextDate = new Date(year, month, day + AUDIT_DATE_FILTER);            
+            const nextDateFormatted = nextDate.toISOString().split('T')[0];
+            $('#to_date').val(nextDateFormatted);
+        }
+    });
+    table = $('#reporttable').DataTable({
+         pageLength: 5,  
+    });
+    ///                 pagination ajax filter audit  ////
+
+   
+    $('#submitBtn').on('click', function(e) {
+        // e.preventDefault();
+
+        let project_id = $('#kit-select').val();
+        let camera_ip = $('#cam-select').val();
+        let fromDate = $('#from_date').val();
+        let toDate = $('#to_date').val();
+
+        console.log("project id", project_id, camera_ip);
+        console.log("fromDate", fromDate);
+        console.log("toDate", toDate);
+
+        if (!project_id || !camera_ip || !fromDate || !toDate) {
+            alertHandler('All fields are required. Please fill in all fields.', false);
+            return;
+        }
+
+        // Destroy old table if exists
+        if ($.fn.DataTable.isDataTable('#reporttable')) {
+            $('#reporttable').DataTable().destroy();
+        }
+
+        table =  $('#reporttable').DataTable({
+            processing: true,
+            serverSide: true,
+            searching: true,
+            ajax: function(data, callback, settings) {
+                let length = data.length || 10;
+                let start = data.start || 0;
+                let search = data.search.value || "";  
+                $.ajax({
+// url: `/main/report/query/filter_data/?project_id=${project_id}&camera_ip=${camera_ip}&from_date=${fromDate}&to_date=${toDate}&start=${start}&length=${length}`,
+url: `/main/report/query/filter_data/?project_id=${project_id}&camera_ip=${camera_ip}&from_date=${fromDate}&to_date=${toDate}&start=${start}&length=${length}&search=${search}`,
+                    method: "GET",
+                    success: function(response) {
+                        callback({
+                            draw: data.draw,
+                            recordsTotal: response.recordsTotal || response.data.length,
+                            recordsFiltered: response.recordsFiltered || response.data.length,
+                            data: response.data
+                        });
+                    },
+                    error: function() {
+                        console.error("Error loading data.");
+                    }
+                });
+            },
+            columns: [  
+
+                { data: 'vehicle_id' },
+                { data: 'vehicle_name' },
+                { data: 'ai_class' },
+                { data: 'audited_class' },
+                {
+                    data: "direction",
+                    render: function(data) {
+                        return data == 0 
+                            ? '<div class="btn btn-label-warning">DOWN</div>'
+                            : '<div class="btn btn-label-success">UP</div>';
+                    }
+                },
+                {
+                    data: "image_path",
+                    render: function(data, type, row) {
+                        return `<img src="${data}" alt="Image" class="table-image" 
+                                    data-image="${data}" 
+                                    data-ai-class="${row.vehicle_name}" 
+                                    data-audit-class="${row.audited_class || ''}" 
+                                    style="width: 100px; height:100px; cursor: pointer;" />`;
+                    }
+                },
+                { data: 'date_time' },
+                {
+                    data: "id",
+                    render: function(data) {
+                        return `<button type="button" data-id="${data}" class="edit-btn btn btn-default">
+                                    <i class="menu-icon tf-icons bx bx-edit"></i>
+                                </button>`;
+                    }
+                }
+            ]
+        });
+    });
+
+
+
+    ///                 pagination ajax filter audit  ////
+
+
+    // $('#submitBtn').on('click', function(e) {
+    //     e.preventDefault();
+    //     let project_id = $('#kit-select').val();
+    //     let camera_ip = $('#cam-select').val();
+    //     let fromDate = $('#from_date').val();
+    //     let toDate = $('#to_date').val();
+    //     console.log("project id",project_id,camera_ip)
+    //     console.log("fromDate",fromDate)
+    //     console.log("toDate",toDate)
+
+    //     if ( !project_id||!camera_ip||!fromDate || !toDate) {
+    //         alertHandler('All fields are required. Please fill in all fields.', false);
+    //         return;
+    //     }
+
+    //     $.ajax({
+    //         url: "/main/report/filter_data/",
+    //         method: "POST",
+    //         contentType: "application/json",
+    //         data: JSON.stringify({
+    //             project_id: project_id,
+    //             camera_ip:camera_ip,
+    //             from_date: fromDate,
+    //             to_date: toDate
+    //         }),
+    //         beforeSend: function() {
+    //             $('#loading').show();  
+    //         },
+    //         success: function(response) {
+    //             $('#loading').hide(); 
+
+    //             table.clear();
+
+    //             response.data.forEach(function(item) {
+
+    //                 table.row.add([
+    //                     item.vehicle_id,
+    //                     item.vehicle_name,
+    //                     item.ai_class,
+    //                     item.audited_class,
+    //                     item.direction == 0 
+    //                           ? '<div class="btn btn-label-success">DOWN</div>' 
+    //                           : '<div class="btn btn-label-warning">UP</div>',  
+    //                    `<img src="${item.image_path}" alt="Image" class="table-image" 
+    //                           data-image="${item.image_path}" 
+    //                           data-ai-class="${item.vehicle_name}" 
+    //                           data-audit-class="${item.audited_class || ''}" 
+    //                           style="width: 100px; height:100px; cursor: pointer;" />`,
+    //                     item.date_time,
+    //                     `<button type="button" data-id="${item.id}" class="edit-btn btn btn-default" >
+    //                      <i class="menu-icon tf-icons bx bx-edit"></i>
+    //                     </button>`
+    //                 ]);
+    //             });
+
+    //             table.draw();
+    //         },
+    //         error: function(err) {
+    //             $('#loading').hide(); 
+    //             console.log(err);
+    //             alertHandler('No Data Found!!', false);
+
+    //         }
+    //     });
+    // });
+
+});
+
+$('#reporttable tbody').on('click', '.edit-btn', function() {
+    const rowId = $(this).data('id');
+    const currentValue = $(this).closest('tr').find('span#audit_class_name').text();
+    const aiClassName = $(this).closest('tr').find('td').eq(2).text();   
+    const projectId = $(this).data('project-id');
+    const cameraIp = $(this).data('camera-ip');
+    $('#auditClassModal #ai_classname').val(aiClassName);
+    $('#auditClassModal #audited_class').val(currentValue);
+    $('#auditClassModal').data('id', rowId); 
+    $('#auditClassModal').modal('show');
+    $('#auditClassModal').data('project-id', projectId);  
+    $('#auditClassModal').data('camera-ip', cameraIp); 
+    console.log("ai Class:",aiClassName,rowId,currentValue)
+    console.log("project id & camera ip in edit btn:",projectId,cameraIp)
+});
+
+$('#saveAuditClass').on('click', function() {
+    const newValue = $('#auditClassModal #audited_class').val();
+    const rowId = $('#auditClassModal').data('id'); 
+    // const row = table.row($('#reporttable tbody .edit-btn[data-id="'+rowId+'"]').closest('tr'));
+    
+     // find the row inside DataTable
+    const row = table.row($('#reporttable tbody .edit-btn[data-id="'+rowId+'"]').closest('tr'));
+
+    const rowData = row.data();
+    console.log("ROW DATA:", rowData);
+
+    const vehicleId = rowData.vehicle_id;   
+    const aiClass = rowData.ai_class;
+
+    // const vehicleId = row.data()[0];   
+    // const aiClass = row.data()[1];  
+
+    
+    let project_id = $('#kit-select').val();
+    let camera_ip = $('#cam-select').val();
+
+    
+    if (!project_id) {
+        project_id = $('#auditClassModal').data('project-id');
+    }
+    if (!camera_ip) {
+        camera_ip = $('#auditClassModal').data('camera-ip');
+    }
+
+
+    console.log("############## ROW ##########:",row,newValue)
+    console.log("*******kishore*********ROW ID:", rowId,camera_ip,project_id);
+
+    
+      
+
+    
+  
+    console.log("*******kishore*********Vehicle ID:", vehicleId);
+    console.log("*******kishore*********AI Class:", aiClass);
+    console.log("*******kishore*********New Audited Class:", newValue);
+
+    $.ajax({
+        url: '/main/report/update_audited_class/',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            id: rowId,
+            vehicle_id: vehicleId,
+            ai_class: aiClass,
+            audited_class: newValue,
+            project_id: project_id,
+            camera_ip:camera_ip,
+            // project_id: rowData.project_id,
+            // camera_ip: rowData.camera_ip,
+
+        }),
+        success: function(response) {
+            console.log('Successfully updated:', response);
+            const updatedData = row.data();
+            console.log("updated data:",updatedData)
+            updatedData[2] = response.updated_audit_class;  
+            // updatedData[3] = response.updated_audit_class;
+            updatedData[3] = response.updated_audit_class1;
+            // updatedData[7] = response.last_updated_username;
+            row.data(updatedData).draw(false); 
+            $('#auditClassModal').modal('hide');
+            alertHandler('Audited class updated successfully!', true);
+            $('#editAuditClassForm')[0].reset();  
+
+            // setTimeout(() => {
+            //     window.location.href = "/main/report/audit/";
+            // }, 1);
+        },
+        error: function(error) {
+            $('#editAuditClassForm')[0].reset();  
+            console.error('Error updating:', error);
+            alertHandler('Failed to update audited class. Please try again.', false);
+        }
+    });
+    $('#auditClassModal').modal('hide');
+});
+
+
+function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; 
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+    alertContainer.appendChild(alertMessage);
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); 
+}
+
+
+function fetchAuditData() {
+    fetch('/main/report/fetch_audit')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!$.fn.DataTable.isDataTable('#reporttable')) {
+                // Initialize DataTable if not already initialized
+                window.table = $('#reporttable').DataTable();
+            }
+            console.log("data in fetch:",data)
+
+                const rows = data.data.map(item => {
+                const projectId = item.project_id || '';
+                const cameraIp = item.camera_ip || '';
+                console.log("project id and camera ip :",projectId,cameraIp)
+            
+                return [
+                    item.vehicle_id || '',
+                    item.vehicle_name || '',
+                    item.ai_class || '',
+                    item.audited_class || '',
+                  
+
+                    item.direction == 0   ? '<div class="btn btn-label-success">DOWN</div>'   : '<div class="btn btn-label-warning">UP</div>',  
+
+
+                    `<img src="${item.image_path}" alt="Image" height="100" width="100"/>`,
+                    item.date_time,
+                    // item.last_modified || '',
+                    `<button type="button" data-id="${item.id}" data-project-id="${projectId}" 
+                             data-camera-ip="${cameraIp}" class="edit-btn btn btn-default">
+                        <i class="menu-icon tf-icons bx bx-edit"></i>
+                    </button>`
+                ];
+            });
+            
+
+            // Clear and repopulate DataTable
+            table.clear().rows.add(rows).draw();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alertHandler('Unable to load data.');
+        });
+}
+
+
+
+
+
+
+
+</script>  
+</html>

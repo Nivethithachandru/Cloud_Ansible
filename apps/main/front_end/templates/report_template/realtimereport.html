@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+        .alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .alert-success {
+        background-color: #4CAF50; 
+      }
+
+      .search-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0rem;  /* Space between the search input and table */
+}
+#search-input{
+    width:67%;
+    margin-left: 33%;
+}
+
+#search-inputs{
+    margin-left: 33%;
+}
+
+.table-image {
+    width: 100px;             
+    height: 100px;            
+    object-fit: contain;       
+    cursor: pointer;         
+}
+
+
+      
+       </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+         
+            <div class="container-xxl flex-grow-1 container-p-y">
+
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span>View Report
+                </h4>
+
+                <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+                <div id="loading" style="display:none; position: fixed; top: 50%; left: 55%; transform: translate(-50%, -50%); z-index: 1000;">
+                    <div class="col">
+                        <div class="sk-fold sk-primary">
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                            <div class="sk-fold-cube"></div>
+                        </div>
+                    </div>  
+                </div>
+  
+
+
+                <div class="row mb-4 col-12">
+                    {% if session.role_id == 0 or page_permission %}
+
+
+                
+                    <div class="col-12 mb-4">
+                        <div class="card">
+                            <h5 class="card-header">View Report</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="search-container">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="search-input" id="search-inputs" >Search</label>
+                                            <input type="text" class="form-control" id="search-input" placeholder="Search by vehicle Name and direction" />
+                                        </div></div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="users_table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Detection ID</th>
+                                                    <th>Project Name</th>
+                                                    <th>Vehicle Class</th>
+                                                    <th>Vehicle ID</th>
+                                                    <th>Line ID</th>
+                                                    <th>Image</th>
+                                                    <th>Direction</th>
+                                                    <th>Date Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="data-body">
+                                                {% for record in data %}
+                                                <tr>
+                                                    <td>{{record.detection_id}}</td>
+                                                    <td>{{ record.project_name }}</td>
+                                                    <td>{{ record.vehicle_name }}</td>
+                                                    <td>{{ record.vehicle_id }}</td>
+                                                    <td>{{record.line_id}}</td>
+                                                    <td>
+                                                        <img src="{{ record.image_path }}" alt="Image" class="table-image"
+                                                             data-image="{{ record.image_path }}" data-vehicle-name="{{ record.vehicle_name }}"
+                                                             style="width: 100px; cursor: pointer;" />
+                                                    </td>
+                                                    <td>
+                                                        {% if record.direction == 0 %}
+                                                            <div class="btn btn-label-warning">DOWN</div>
+                                                        {% else %}
+                                                            <div class="btn btn-label-success">UP</div>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ record.date_time }}</td>
+                                                
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                 
+                {% else %}
+                <div class=" h-100">
+                  <div class="card-header">
+                      <div class="alert alert-danger" role="alert">
+                          Access Denied: You do not have the necessary permissions to view this page.
+                      </div>
+                  </div>
+              </div>                   
+              {% endif %}
+
+
+
+
+            </div>
+
+            <div class="modal fade" id="imageZoomModal" tabindex="-1" aria-labelledby="imageZoomModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageZoomModalLabel">Image Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="zoomedImage" src="" alt="Zoomed Image" style="width: 100%; max-height: 80vh; object-fit: contain;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+ 
+  <script>
+
+$(document).ready(function() {
+    $('#search-input').on('input', function() {
+        $('#users_table').DataTable().ajax.reload();
+    });
+
+    let projectId = "{{ project_id }}";
+    let cameraIp = "{{ camera_ip }}";
+    let detectionId = "{{ detection_id }}";
+
+    $('#users_table').DataTable({
+        processing: false,
+        serverSide: true,
+        searching: false,
+        ajax: function(data, callback, settings) {
+            let length = data.length || 10;
+            let start = data.start || 0;
+            let searchTerm = $('#search-input').val();  
+
+            $.ajax({
+                url: `/main/view/datatable/data/${projectId}/${cameraIp}/${detectionId}`,
+                type: "GET",
+                data: {
+                    length: length,
+                    start: start,
+                    search: searchTerm 
+                },
+                success: function(response) {
+                    callback({
+                        draw: data.draw,
+                        recordsTotal: response.recordsTotal,
+                        recordsFiltered: response.recordsFiltered,
+                        data: response.data
+                    });
+                },
+                error: function() {
+                    console.error("Error loading data.");
+                }
+            });
+        },
+        columns: [
+            { data: "detection_id" },
+            { data: "project_name" },
+            { data: "vehicle_name" },
+            { data: "vehicle_id" },
+            { data: "line_id" },
+            {
+                data: "image_path",
+                render: function(data) {
+                    return `<img src="${data}" alt="Image" class="table-image" style="width: 100px; cursor: pointer;" />`;
+                }
+            },
+            {
+                data: "direction",
+                render: function(data) {
+                    return data == 0 
+                        ? '<div class="btn btn-label-warning">DOWN</div>'
+                        : '<div class="btn btn-label-success">UP</div>';
+                }
+            },
+            { data: "date_time" }
+        ]
+    });
+
+    $(document).on('click', '.table-image', function() {
+        const imageUrl = $(this).attr('src');
+        $('#zoomedImage').attr('src', imageUrl);
+        $('#imageZoomModal').modal('show');
+    });
+});
+     
+    </script>
+</html>

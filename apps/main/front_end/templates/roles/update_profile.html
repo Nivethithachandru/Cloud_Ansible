@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+  
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> Update Password
+                </h4>
+                <div class="row mb-4 col-6">
+                    <div class="col-md">
+                        <div class="card">
+                          <h5 class="card-header">Update Password</h5>
+                          <div class="card-body">
+                            {% if message %}
+                            <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endif %}
+                        <form id="formValidationExamples" action="/main/user/update_password/" method="post">
+                            <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                            <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+                        
+           
+                            <div class="col-md-6 col-lg-12 mb-4">
+                                <label for="user_name" class="col-sm-2 col-form-label">Username</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" class="form-control" id="user_name" name="user_name" value="{{ user_name }}" readonly>
+                                    </div>
+                            </div>
+
+
+                            <div class="col-md-6 col-lg-12 mb-4">
+                                    <label for="user_email" class="col-sm-2 col-form-label">User Email</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="email" class="form-control" id="user_email" name="user_email" value="{{ user_email }}" readonly>
+                                    </div>
+                            </div>
+
+
+
+                        
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <div class="form-password-toggle">
+                                        <label class="form-label" for="formValidationPass">Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input
+                                                class="form-control"
+                                                type="password"
+                                                id="formValidationPass"
+                                                name="formValidationPass"
+                                                required
+                                                aria-describedby="multicol-password2" />
+                                            <span class="input-group-text cursor-pointer" id="multicol-password2">
+                                                <i class="bx bx-hide"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                                <div class="col-md-6 col-lg-12 mb-4">
+                                    <div class="form-password-toggle">
+                                        <label class="form-label" for="formValidationConfirmPass">Confirm Password</label>
+                                        <div class="input-group input-group-merge">
+                                            <input
+                                                class="form-control"
+                                                type="password"
+                                                id="formValidationConfirmPass"
+                                                name="formValidationConfirmPass"
+                                                required
+                                                aria-describedby="multicol-confirm-password2" />
+                                            <span class="input-group-text cursor-pointer" id="multicol-confirm-password2">
+                                                <i class="bx bx-hide"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        
+                        
+
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+
+</html>

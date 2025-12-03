@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-msg {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation-duration: 0.6s;
+            position: relative;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide-in {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .slide-in-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                  <span class="text-muted fw-light">{{ session.role_name }} /</span> Detection Management
+              </h4>
+              <div class="row mb-4">
+                  
+                    <p class="text-danger">
+                    <b>Note:</b> Please allow up to 1 minutes for cloud synchronization after drawing and mapping a line. Then, click the detection button to start the analytical.
+                    </p>
+
+
+                  <div class="card mt-3">
+                    <h5 class="card-header">Detection Lists</h5>
+                    
+                    {% if session.role_id == 0  or page_permission %}
+                    <div class="card-datatable text-nowrap table-responsive">
+                        <table class=" table table-bordered" id="users_table">
+                            <thead>
+                                <tr>
+                                    <th>S.no</th>
+                                    <th>Proj ID</th>
+                                    <th>Proj Name</th>
+                                    <th>Cam IP</th>                                   
+                                    <th>Line Coord</th>
+                                    <!-- <th>polygon</th>  -->
+                                    <th>Select ROI</th>
+                                    <th>Start </th>
+                                    <th>Stop</th>
+                                    <th>Status</th>
+                                    <th>Cam Status</th>
+                                    <th>Actions</th>
+                                </tr>                               
+                            </thead>
+                            <tbody >
+                                 
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                            <div class=" h-100">
+                                <div class="card-header">
+                                    <div class="alert alert-danger" role="alert">
+                                        Access Denied: You do not have the necessary permissions to view this page.
+                                    </div>
+                                </div>
+                            </div>                           
+                    {% endif %}
+                    
+              </div>
+
+
+              
+          </div>
+          
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+ 
+     const delete_permission = {{ 'true' if delete_permission else 'false' }};
+        
+ const currentDrawn = {{ current_drawn | tojson }};
+const waitingProjectIds = currentDrawn.map(item => item.project_id);
+
+
+let activeProcesses = 0;
+
+
+
+$(document).ready(function() {
+    const usersTable = $('#users_table').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": "/main/list_project/",
+            "dataSrc": "data"
+        },
+        "columns": [
+            {
+                data: null,
+                render: function(data, type, full, meta) {
+                    return meta.row + 1; 
+                }
+            },
+            { "data": "project_id" }, 
+            { "data": "project_name" },
+            { "data": "camera_ip" },
+            
+            {
+                "data": "line",
+                render: function(data) {
+                    if (!data || data.length === 0) {
+                        return `<span class="badge rounded-pill bg-label-info">Null</span>`;
+                    }
+                    const badges = data.map(item => {
+                        return `<span class="badge rounded-pill bg-label-success">${item}</span>`;
+                    });
+                    return badges.join(' ');
+                }
+            },
+            // {
+            //     "data": "polygon",
+            //     render: function(data) {
+            //         if (!data || data.length === 0) {
+            //             return `<span class="badge rounded-pill bg-label-info">Null</span>`;
+            //         }
+            //         const badges = data.map(item => {
+            //             return `<span class="badge rounded-pill bg-label-primary">${item}</span>`;
+            //         });
+            //         return badges.join(' ');
+            //     }
+            // },
+            {
+                data:null,
+                // render:function(data){
+                //     return `
+                //     <div class="d-flex align-items-center">
+                //         <select class="form-control me-2" id="action_select_${data.project_id}">
+                //             <option value="">Select Action</option>
+                //             <option value="draw_line">Draw Line</option>
+                //             <option value="polygon">Polygon</option>
+                //         </select>
+                      
+                //     </div>
+                // `;
+                render:function(data){
+                    return `
+                    <div class="d-flex align-items-center">
+                        <select class="form-control me-2" id="action_select_${data.project_id}">
+                            <option value="">Select Action</option>
+                            <option value="draw_line" selected >Draw Line</option>
+                        </select>
+                      
+                    </div>
+                `;
+            }
+
+                },
+
+            {
+                data: null,
+                render: function (data) {
+
+                    // Check if this project_id is waiting
+                    const isWaiting = waitingProjectIds.includes(data.project_id);
+
+                    const isDisabled = activeProcesses >= 2 ? 'disabled' : ''; 
+                    // const isDisabled = (activeProcesses >= 2 || isWaiting) ? 'disabled' : '';
+                    return `
+                        <button type="button" class="btn btn-sm btn-success start-btn" 
+                                onclick="cloud_start('${data.project_id}','${data.camera_ip}','${data.line}','${data.polygon}')"
+                                ${isDisabled}>Detect</button>
+                    `;
+                }
+            },
+            {
+                data: null,
+                render: function(data) {
+                    return `
+                        <button type="button" class="btn btn-sm btn-danger stop-btn" onclick="cloud_stop('${data.project_id}','${data.camera_ip}')">Stop
+                            <i class="fa-solid fa-x"></i>
+                        </button>
+                        <span id="loadingMessage" style="display:none;">loading...</span>
+                    `;
+                }
+            },
+            {
+                data: null,
+                render: function (data) {
+                    let statusClass = "text-primary"; 
+                    let statusText = "Inactive";
+
+                    console.log("&^%&^:",data.detection_status )
+
+                    if (data.detection_status === true) {
+                        statusClass = "text-success"; 
+                        statusText = "Processing";
+                    } else if (data.detection_status === false) {
+                        statusClass = "text-danger";
+                        statusText = "Stopped";
+                    }
+
+                    return `
+                        <span class="${statusClass}">${statusText}</span>
+                    `;
+                }
+            },
+            {
+                "data" : "camera_status",
+                render: function(data){
+                    if (data){
+                        return `<span class="badge rounded-pill bg-label-success">True</span>`;
+                    }
+                    else{
+                        return `<span class="badge rounded-pill bg-label-danger">False</span>`;                        
+                    }
+                }
+            },
+            {
+                "data": null,
+                render: function(data, type, row) {
+                    return `
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item delete-lpu" data-project-id="${row.project_id}" data-camera-ip="${row.camera_ip}">
+                                    <i class="bx bx-trash me-1"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        ],
+        "createdRow": function (row, data) {
+            $(row).attr("data-project_id", data.project_id);
+            $(row).attr("data-camera_ip", data.camera_ip);
+        }
+    });
+
+    $('#users_table tbody').on('click', '.delete-lpu', function() {
+        const project_id = $(this).data('project-id'); 
+        const camera_ip = $(this).data('camera-ip'); 
+
+        if (!delete_permission) {
+            Swal.fire({
+                title: 'Access Denied!',
+                text: 'You do not have permission to delete Detection.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return; 
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'All records related to this project will be deleted!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/main/project/delete/${project_id}/${camera_ip}`,
+                    type: 'DELETE',
+                    data: JSON.stringify({ project_id: project_id, camera_ip: camera_ip }), 
+                    contentType: "application/json",
+                    success: function(response) {
+                        Swal.fire('Deleted!', 'Project deleted successfully!', 'success');
+                        usersTable.ajax.reload();  
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Error deleting Project.', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+
+    
+    $(document).ready(function() {
+        $('#ip_select').select2({
+        placeholder: "Select Camera Ip",  
+        allowClear: true 
+    });
+    $('#user_assesstion_form').submit(function(e) {
+        e.preventDefault();
+
+        function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show loading message
+        const loadingMessageDiv = $('#loadingMessage');
+        loadingMessageDiv.show().text("Submitting...");
+
+        const project_id = $('#project_id').val();
+        const project_name = $('#project_name').val();
+        const ip_select = $('#ip_select').val(); 
+        const cam_status = $('#cam_status').val();
+        const analytics = $('#analytics').val();
+
+        if (!project_id || !project_name || !ip_select || !cam_status) {
+            loadingMessageDiv.hide();
+            showAlert('Please fill out all fields.', 'danger');
+            return;
+        }
+    
+        $.ajax({
+            url: '/main/add/project',
+            method: 'POST',
+            contentType: "application/json",
+            data: JSON.stringify({
+                project_id: project_id,
+                project_name: project_name,
+                camera_ips: [ip_select], 
+                camera_status: cam_status,
+                analytics: analytics
+            }),
+            success: function(response) {
+                loadingMessageDiv.hide();
+                showAlert('Project created successfully!', 'success');
+                $('#user_assesstion_form')[0].reset();
+            },
+            error: function(xhr) {
+                loadingMessageDiv.hide();
+                const errorMessage = JSON.parse(xhr.responseText).message;
+                showAlert("Error: " + errorMessage, 'danger');
+            }
+        });
+    });
+});
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.project_status === true) {
+            Toastify({
+                text: data.latest_status.message || "Project Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+
+function cloud_start(project_id, camera_ip, line,polygon) {
+    console.log("&&&&:", project_id, line);
+    console.log("&&&&&&&&&^%$^$^45",camera_ip)
+    let actionSelect = document.getElementById(`action_select_${project_id}`);
+    let selected = actionSelect.value;
+    console.log("selected action:",selected,line)
+
+    if (activeProcesses >= 2) {
+        Swal.fire('Limit Reached!', 'Cannot start detection. There are already 2 processes running.', 'warning');
+        return;  
+    }
+
+    let line_value = !line || line === '{}' || line === '';
+    let  polygon_value = !polygon || polygon === '{}' || polygon === '';
+
+    if (selected === 'draw_line' && line_value) {
+        Swal.fire('Map Line First!', 'Map a line to access DrawLine functionality.', 'warning');
+        return;
+    }
+
+    if (selected === 'polygon' && polygon_value) {
+        Swal.fire('Map Polygon First!', 'Map a polygon to access Polygon functionality.', 'warning');
+        return;
+    }
+
+    if (!selected || selected === '{}'|| selected ==null) {
+        Swal.fire('Choose DrawLine or Polygon', 'Cannot start detection.', 'warning');
+        return;
+    }
+
+    const data = { project_id, camera_ip,line: line || '',polygon: polygon || '',selected };
+
+    $(`#users_table tbody tr[data-project_id="${project_id}"][data-camera_ip="${camera_ip}"] .start-btn`).prop('disabled', true);
+
+    fetch('/main/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            activeProcesses++;  
+            Toastify({
+                text: "Detection Started! Wait for some time to get the results.",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast()
+        } else {
+            if (result.message === "Kit is offline") {
+                Swal.fire('Kit Offline!', 'Cannot start detection because the kit is offline.', 'error');
+            } else {
+                throw new Error(result.message);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error', error.message || "An error occurred", 'error');
+
+        $(`#users_table tbody tr[data-project_id="${project_id}"][data-camera_ip="${camera_ip}"] .start-btn`).prop('disabled', false);
+    });
+}
+
+
+function cloud_stop(project_id, camera_ip) {
+    //if (activeProcesses <= 0) {
+     //   Swal.fire('No Active Processes!', 'No detection is currently running.', 'warning');
+       // return;
+   // }
+
+    document.getElementById('loadingMessage').style.display = 'inline';
+
+    const data = { project_id, camera_ip };
+
+    fetch(`/stop_cloud`, {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            activeProcesses = Math.max(0, activeProcesses - 1);
+            Toastify({
+                text: "Detection Stopped!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                stopOnFocus: true
+            }).showToast();
+
+            updateStatus(project_id, camera_ip, "stopped"); 
+
+            $(`#users_table tbody tr[data-project_id="${project_id}"][data-camera_ip="${camera_ip}"] .start-btn`).prop('disabled', false);
+        } else {
+            throw new Error(result.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Toastify({
+            text: error.message || "An error occurred",
+            duration: 6000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+            stopOnFocus: true
+        }).showToast();
+
+        $(`#users_table tbody tr[data-project_id="${project_id}"][data-camera_ip="${camera_ip}"] .start-btn`).prop('disabled', false);
+        
+    })
+    .finally(() => {
+        document.getElementById('loadingMessage').style.display = 'none';
+        $(`#users_table tbody tr[data-project_id="${project_id}"][data-camera_ip="${camera_ip}"] .start-btn`).prop('disabled', false);
+
+    });
+}
+
+
+
+function fetchAndUpdateStatuses() {
+    fetch('/main/list_project/')
+        .then(response => response.json())
+        .then(data => {
+            data.data.forEach(item => {
+                updateStatus(item.project_id, item.camera_ip, item.detection_status);
+            });
+        })
+        .catch(error => console.error('Error fetching statuses:', error));
+}
+
+
+$(document).ready(function() {
+    fetchAndUpdateStatuses();
+    setTimeout(fetchAndUpdateStatuses,3000);  
+});
+
+
+
+setInterval(fetchAndUpdateStatuses, 3000);
+
+function updateStatus(project_id, camera_ip, detection_status) {
+    const row = $(`#users_table tbody tr`).filter(function() {
+        return $(this).data("project_id") === project_id && $(this).data("camera_ip") === camera_ip;
+    });
+
+    if (row.length === 0) return; 
+
+    //const statusCell = row.find('td[data-status]');  
+    const statusCell = row.find('td:nth-child(10)'); 
+    const startButton = row.find('.start-btn');
+    const stopButton = row.find('.stop-btn');
+
+    let statusBadge = "";
+    console.log("Detection status:", detection_status, "Project ID:", project_id);
+
+    if (detection_status === true) {
+        statusBadge = `<span class="badge rounded-pill bg-success">Processing</span>`;
+        startButton.prop('disabled', true);  
+        stopButton.prop('disabled', false);
+    } else if (detection_status === false) {
+        statusBadge = `<span class="badge rounded-pill bg-danger">Stopped</span>`;
+        startButton.prop('disabled', false); 
+        stopButton.prop('disabled', true);   
+    } else {
+        statusBadge = `<span class="badge rounded-pill bg-primary">Inactive</span>`;
+        startButton.prop('disabled', false); 
+        stopButton.prop('disabled', true);
+    }
+
+    statusCell.html(statusBadge); 
+}
+
+
+
+
+
+
+
+function alertHandler(message, isSuccess) {
+        const alertContainer = document.getElementById('alert-container');
+        const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; 
+        const alertMessage = document.createElement('div');
+        alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+        alertMessage.textContent = message;
+    
+        // Append the alert message to the container
+        alertContainer.appendChild(alertMessage);
+    
+        // Trigger the slide-in effect
+        setTimeout(() => {
+            alertMessage.classList.add('slide-in-active');
+        }, 10);
+    
+        // Remove the alert after some time
+        setTimeout(() => {
+            alertMessage.classList.remove('slide-in-active');
+            alertMessage.classList.add('slide-out-active');
+    
+            // Remove the alert from the DOM after animation
+            setTimeout(() => {
+                alertContainer.removeChild(alertMessage);
+            }, 500);
+        }, 3000); // Duration before the alert starts to fade out
+    }
+
+
+
+       
+
+   
+    currentDrawn.forEach(item => {
+        const modifiedTime = new Date(item.datetime);
+
+        // Create a span to hold the countdown text
+        const toastContent = document.createElement("span");
+        toastContent.innerText = `⏳ Project: ${item.project_id}, Camera: ${item.camera_ip}, Line: ${item.lineid} waiting to sync`;
+
+        // Create Toastify once
+        const toast = Toastify({
+            node: toastContent,
+            duration: -1, // infinite duration
+            close: true,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+        }).showToast();
+
+        // Check every second in background
+        const intervalId = setInterval(() => {
+            const now = new Date();
+            const elapsedMs = now - modifiedTime;
+            const remainingMs = 60000 - elapsedMs; // 3 minutes = 180000 ms 1 mi = 60000ms
+
+            if (remainingMs > 0) {
+                const remainingSec = Math.ceil(remainingMs / 1000);
+                toastContent.innerText = `⏳ Project: ${item.project_id}, Camera: ${item.camera_ip}, Line: ${item.lineid} waiting to sync (${remainingSec} sec left)`;
+            } else {
+                // Time completed → show success
+                toastContent.innerText = `✅ Project: ${item.project_id}, Camera: ${item.camera_ip}, Line: ${item.lineid} synced successfully`;
+                toast.setDuration(5000); // disappear after 5 sec
+                clearInterval(intervalId); // stop background check
+            }
+        }, 1000); // check every second
+    });
+
+  </script>
+
+

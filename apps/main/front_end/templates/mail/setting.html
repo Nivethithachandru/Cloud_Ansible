@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+         
+
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .bx-x:before {
+            content: "\ec8d";
+            margin-left: 5px;
+        }
+        .bx-check:before {
+            content: "\ea41";
+         
+            margin-left: 5px;
+        }
+            </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> Settings
+                </h4>
+                <div class="row mb-4 col-6">
+                    <div class="col-md">
+                        <div class="card">
+                          <h5 class="card-header">Settings</h5>
+                          <div class="card-body">
+                            <form id="setting_form">
+                              <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                              <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+                              <span class="mb-3 mt-4 menu-header-text">Email Settings</span>
+                          
+                              <div class="mb-3 mt-4">
+                                  <label class="form-label" for="to_address">To Address (Multiple Emails)</label>
+                                  <textarea
+                                      class="form-control"
+                                      id="to_address"
+                                      placeholder="Enter multiple email addresses separated by commas"
+                                      required>{{ ', '.join(existing_settings.to_address) }}</textarea>
+                              </div>
+                              <br>
+                              <span class="mb-3 mt-5 menu-header-text">Enable/Disable Settings</span>
+                          
+                          
+                              <div class="col-12 row mb-3 mt-4">
+                                  <div class="col-6">
+                                      <label class="form-label" for="kit_alert">Kit Alert</label>
+                                  </div>
+                                  <div class="col-6">
+                                      <label class="switch switch-square switch-lg">
+                                          <input type="checkbox" class="switch-input" id="kit_alert" name="kit_alert" {{ 'checked' if existing_settings.kit_alert else '' }} />
+                                          <span class="switch-toggle-slider">
+                                              <span class="kit_switch-on"><i class="bx bx-check"></i></span>
+                                              <span class="kit_switch-off"><i class="bx bx-x"></i></span>
+                                          </span>
+                                      </label>
+                                  </div>
+                              </div>
+                          
+                              <div class="col-12 row mb-3">
+                                  <div class="col-6">
+                                      <label class="form-label" for="camera_alert">Camera Alert</label>
+                                  </div>
+                                  <div class="col-6">
+                                      <label class="switch switch-square switch-lg">
+                                          <input type="checkbox" class="switch-input" id="camera_alert" name="camera_alert" {{ 'checked' if existing_settings.camera_alert else '' }} />
+                                          <span class="switch-toggle-slider">
+                                              <span class="camera_switch-on"><i class="bx bx-check"></i></span>
+                                              <span class="camera_switch-off"><i class="bx bx-x"></i></span>
+                                          </span>
+                                      </label>
+                                  </div>
+                              </div>
+                          
+                              <div class="col-12 row mb-3">
+                                  <div class="col-6">
+                                      <label class="form-label" for="storage_alert">Storage Alert</label>
+                                  </div>
+                                  <div class="col-6">
+                                      <label class="switch switch-square switch-lg">
+                                          <input type="checkbox" class="switch-input" id="storage_alert" name="storage_alert" {{ 'checked' if existing_settings.storage_alert else '' }} />
+                                          <span class="switch-toggle-slider">
+                                              <span class="storage_switch-on"><i class="bx bx-check"></i></span>
+                                              <span class="storage_switch-off"><i class="bx bx-x"></i></span>
+                                          </span>
+                                      </label>
+                                  </div>
+                              </div>
+                          
+                              <div class="col-12 row mb-3">
+                                  <div class="col-6">
+                                      <label class="form-label" for="temp_alert">Temperature Alert</label>
+                                  </div>
+                                  <div class="col-6">
+                                      <label class="switch switch-square switch-lg">
+                                          <input type="checkbox" class="switch-input" id="temp_alert" name="temp_alert" {{ 'checked' if existing_settings.temperature_alert else '' }} />
+                                          <span class="switch-toggle-slider">
+                                              <span class="temp_switch-on"><i class="bx bx-check"></i></span>
+                                              <span class="temp_switch-off"><i class="bx bx-x"></i></span>
+                                          </span>
+                                      </label>
+                                  </div>
+                              </div>
+                          
+                              <div class="row">
+                                  <div class="col-12">
+                                      <button type="submit" class="btn btn-primary">Submit</button>
+                                  </div>
+                              </div>
+                          </form>
+                          
+                          
+                          
+                          
+                          
+                          
+                          </div>
+                        </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+   
+    $(document).ready(function() {
+      $('#setting_form').submit(function(e) {
+          e.preventDefault();
+  
+          function showAlert(message, type = 'danger') {
+              const alertMessageDiv = document.getElementById('alertMessage');
+              alertMessageDiv.style.display = 'block';
+              alertMessageDiv.innerText = message;
+              alertMessageDiv.style.color = 'white';
+              alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+              alertMessageDiv.style.padding = '10px';
+              alertMessageDiv.style.borderRadius = '5px';
+              setTimeout(function() {
+                  alertMessageDiv.style.display = 'none';
+              }, 5000);
+          }
+  
+          const loadingMessageDiv = $('#loadingMessage');
+          loadingMessageDiv.show().text("Submitting...");
+  
+          const to_address = $('#to_address').val();   
+          const kit_alert = $('#kit_alert').is(':checked');
+          const camera_alert = $('#camera_alert').is(':checked');
+          const storage_alert = $('#storage_alert').is(':checked');
+          const temp_alert = $('#temp_alert').is(':checked');
+          console.log(to_address, kit_alert, camera_alert, storage_alert, temp_alert);
+  
+          $.ajax({
+              url: '/main/setting/add_update/',
+              method: 'POST',
+              contentType: "application/json",
+              data: JSON.stringify({
+                  to_address: to_address,  
+                  kit_alert: kit_alert,
+                  camera_alert: camera_alert,
+                  storage_alert: storage_alert,
+                  temp_alert: temp_alert                
+              }),
+              success: function(response) {
+                  loadingMessageDiv.hide();
+                  showAlert(response.message, 'success'); 
+                     
+              },
+              error: function(xhr) {
+                  loadingMessageDiv.hide();
+                  const errorMessage = JSON.parse(xhr.responseText).message;                  
+                  showAlert("Error: " + errorMessage, 'danger');
+              }
+          });
+      });
+  });
+  
+
+
+  </script>
+</html>

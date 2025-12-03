@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  </head>
+  <style>
+      .alert-msg {
+    background-color: #f44336; /* Red */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    animation-duration: 0.6s;
+    position: relative;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-in {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.slide-in-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out-active {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+table th,
+table td {
+  padding: .625em;
+  text-align: center;
+}
+
+.alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .alert-success {
+        background-color: #4CAF50; 
+      }
+
+
+
+    </style>
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+            {% include 'header_nav.html' %}
+          <!-- Navbar -->
+
+          <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+            <div class="container-fluid">
+              <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                  <i class="bx bx-menu bx-sm"></i>
+                </a>
+              </div>
+
+              <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                
+
+                <ul class="navbar-nav flex-row align-items-center ms-auto">
+                 
+                  <!-- Style Switcher -->
+                  <li class="nav-item me-2 me-xl-0">
+                    <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
+                      <i class="bx bx-sm"></i>
+                    </a>
+                  </li>
+                  <!--/ Style Switcher -->
+
+                </ul>
+              </div>
+
+            </div>
+          </nav>
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4"><span class="text-muted fw-light">MOVABLE /</span> ROI Service</h4>
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+              
+
+<!-- =================================================================================================================== -->
+              <div class="row g-4 mb-4 ">              
+                <!-- Draw line roi service-->
+                <div class="col-md-12 col-lg-12 col-xl-12 mb-4 mb-xl-0">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between ">
+                      <!-- <div>
+                        <h5 class="card-title mb-0">ROI Service</h5>
+                        <small class="text-muted">Draw Polygon on image</small>
+                      </div> -->
+
+                      <div class="card-body">
+                        <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                        <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+                        <!-- <p class="points-info">No points yet</p> -->
+                        <!-- Block Ui Section-->
+  
+                        <div id="section-block" class="loading_section">
+                          <!-- Loading indicator -->
+                          <p id="camera_message_above"   style="text-align: center;" >Select Camera and then Get a current frame</p>                        
+                          <div id="image-container"></div>
+                 
+                        </div>
+                    
+                              <div class=" p-3" id="section-block" style="display: none;"> </div>
+                              <p class="points-info" id="point_info" style="display: none;">No points yet</p>
+                              <div id="canvas_measure" style="overflow: auto; max-width: 100%;">
+                                <canvas id="polygon" style="display: none;"></canvas>
+                              </div>
+                              </div></div></div></div></div>
+                              <div class="row g-4 mb-4">              
+                                <div class="col-md-12 col-lg-12 col-xl-12 mb-4 mb-xl-0">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="card-title mb-0">Polygon Coordinates</h5>
+                                        </div>
+                                        <div class="card-body">
+                           
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered" id="users_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>S.no</th>
+                                                            <th>Project Id</th>
+                                                            <th>Camera IP</th>
+                                                            <th>Polygon Coordinates</th>
+                                                            
+                                                           
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                       
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+</div></div></div></div></div>
+                              
+                            {% include 'script_file.html' %}
+    
+                        </body>               
+
+<script>
+var projectId = "{{ project_id }}";
+var cameraIp = "{{ camera_ip }}";
+console.log("in polygon, camera ip:", cameraIp, projectId);
+getframe(cameraIp, projectId);
+var points = [];
+$(document).ready(function() {
+    var projectId = "{{ project_id }}";
+    var cameraIp = "{{ camera_ip }}";
+
+    console.log("Initializing DataTable with:", projectId, cameraIp);
+
+    if (!projectId || !cameraIp) {
+        console.error("projectId or cameraIp is missing!");
+        return;
+    }
+
+    polygon_datatable(projectId, cameraIp);
+});
+
+
+function polygon_datatable(projectId, cameraIp) {
+    console.log("@#$#W%#^$%^%$^% in polygon datatable ")
+    const polygonTable = $('#users_table');
+
+    if (polygonTable.length === 0) {
+        console.error("#users_table not found in the DOM!");
+        return;
+    }
+
+    const table = $('#users_table').DataTable({
+        "processing": true,
+        "serverSide": false,
+   
+        "autoWidth": false,  
+        "responsive": true,  
+        "ajax": {
+            "url": "/polygon/datatable",
+            "type": "GET",
+            "data": function(d) {
+                d.project_id = projectId;
+                d.camera_ip = cameraIp;
+            },
+            "error": function(xhr, status, error) {
+                console.error("AJAX Error:", status, error);
+                console.error("Response:", xhr.responseText);
+            },
+            "dataSrc": function(json) {
+                console.log("Received Data:", json);
+                return json.data || [];
+            }
+        },
+        "columns": [
+            { "data": null, render: function(data, type, full, meta) { return meta.row + 1; } },
+            { "data": null, render: function() { return projectId; } },
+            { "data": null, render: function() { return cameraIp; } },
+            {
+    "data": "coordinates",
+    render: function(data) {
+        if (!data) {
+            return `<span class="badge rounded-pill bg-label-info">No Data</span>`;
+        }
+
+      
+        let coordinates = data.replace(/^\(|\)$/g, "").split(")(");
+
+      
+        return coordinates.map(coord => `<span class="badge rounded-pill bg-label-success">(${coord})</span>`).join(' ');
+    }
+},
+
+        ]
+    });
+
+   
+}
+
+
+var polygonlist = JSON.parse('{{ polygon_list|safe }}');
+console.log("Polygon Coordinates:", polygonlist);
+
+
+async function getframe(cameraIp, projectId) {
+    console.log("getframe called with:", cameraIp, projectId);
+    const apiUrl = `/getframe/${encodeURIComponent(cameraIp)}/${encodeURIComponent(projectId)}`;
+
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        console.log("Frame data received:", data);
+
+        if (data.message === "success" && data.data.frame_baseurl) {
+            const imageSrc = `data:image/jpeg;base64,${data.data.frame_baseurl}`;
+            const sectionBlock = document.getElementById("section-block");
+
+        
+            sectionBlock.innerHTML = `
+                        <div>
+                            <h5 class="card-title mb-0">ROI Service</h5>
+                            <small class="text-muted">Click to Draw Polygon</small>
+                        </div>
+                        <div style="position: relative; width: 100%;">
+                            <img id="roiImage" src="${imageSrc}" style="width: 100%; height: auto; margin-top: 10px;">
+                            <canvas id="polygonCanvas" style="position: absolute; top: 0; left: 0;"></canvas>
+                        </div>
+
+                        
+                        <!-- Button Container with Flexbox -->
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="btn btn-primary" id="savePolygon" style="display: none;">Submit</button>
+                            <button class="btn btn-danger" id="clearPolygon">Clear</button>
+                        </div>
+                    `;
+
+
+            var canvas = document.getElementById("polygonCanvas");
+            var ctx = canvas.getContext("2d");
+            var img = document.getElementById("roiImage");
+            var saveBtn = document.getElementById("savePolygon");
+            var clearBtn = document.getElementById("clearPolygon");
+            
+            img.onload = async function () {
+                // Set canvas width & height to match displayed image
+                canvas.width = img.clientWidth;
+                canvas.height = img.clientHeight;
+                
+                console.log("Canvas resized:", canvas.width, canvas.height);
+
+                // Fetch and draw existing polygon
+                await fetchExistingPolygon(cameraIp, projectId, ctx);
+            };
+
+
+            let points = [];
+
+        
+            canvas.addEventListener("click", function (event) {
+                var rect = canvas.getBoundingClientRect();
+                var x = event.clientX - rect.left;
+                var y = event.clientY - rect.top;
+
+                points.push({ x, y });
+                drawPolygon(canvas, ctx, points);
+
+                if (points.length > 2) {
+                    saveBtn.style.display = "block";
+                }
+            });
+
+         
+            canvas.addEventListener("dblclick", function () {
+                if (points.length > 2) {
+                    points.push(points[0]); // Close polygon
+                    drawPolygon(canvas, ctx, points);
+                }
+            });
+
+          
+            saveBtn.addEventListener("click", function () {
+            console.log("Polygon coordinates before closing:", points);
+
+            if (points.length > 2 && (points[0].x !== points[points.length - 1].x || points[0].y !== points[points.length - 1].y)) {
+                points.push(points[0]); 
+            }
+
+            drawPolygon(canvas, ctx, points);
+            console.log("Polygon coordinates after closing:", points);
+            polygon_data(points, cameraIp, projectId);
+        });
+
+            clearBtn.addEventListener("click", function () {
+                points = [];
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                saveBtn.style.display = "none";
+            });
+        }
+    } catch (error) {
+        console.error("Error fetching frame:", error);
+    }
+}
+
+
+function drawPolygon(canvas, ctx, points) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (points.length > 0) {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.closePath();
+    }
+}
+
+async function fetchExistingPolygon(cameraIp, projectId, ctx) {
+    console.log("Fetching existing polygon for:", cameraIp, projectId);
+
+    try {
+  
+        let existingPolygon = polygonlist.find(poly => poly.coordinates);
+
+        if (existingPolygon) {
+            let points = existingPolygon.coordinates.map(coord => ({
+                x: Object.values(coord)[0], 
+                y: Object.values(coord)[1]  
+            }));
+
+            console.log("Existing Polygon Coordinates:", points);
+
+           
+            drawPolygon(document.getElementById("polygonCanvas"), ctx, points);
+        }
+    } catch (error) {
+        console.error("Error fetching existing polygon:", error);
+    }
+}
+
+
+
+async function polygon_data(points, cameraIp, projectId) {
+    const apiUrl = "/main/polygon/Polygon_coords";
+    const payload = {
+        project_id: projectId,
+        camera_ip: cameraIp,
+        points: points
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(result.detail || "Failed to save polygon.");
+        }
+
+        alertHandler("Polygon Updated successfully!", true);
+        setTimeout(() => {
+                       location.reload();
+                     }, 1000);
+    } catch (error) {
+        console.error("Error saving polygon:", error);
+        alertHandler(`Error: ${error.message}`, false);
+    }
+}
+
+
+function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; // Change class based on success or failure
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+
+    // Append the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // Trigger the slide-in effect
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+
+    // Remove the alert after some time
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+
+        // Remove the alert from the DOM after animation
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); // Duration before the alert starts to fade out
+}
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.polygon_status === true) {
+            Toastify({
+                text: data.latest_status.message || "Polygon Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+
+canvas.addEventListener("dblclick", function () {
+    if (points.length > 2) {
+        points.push(points[0]); 
+        drawPolygon();
+    }
+});
+
+
+</script>

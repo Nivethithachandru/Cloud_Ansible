@@ -1,0 +1,17 @@
+numpy
+pandas
+psycopg2-binary
+uvicorn
+fastapi
+SQLAlchemy
+openpyxl
+python-dotenv
+asyncpg
+itsdangerous
+passlib
+jinja2
+requests
+APScheduler
+python-multipart
+netifaces
+aiocron

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <style>
+  .alert-msg {
+    background-color: #f44336; /* Red */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    animation-duration: 0.6s;
+    position: relative;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-in {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.slide-in-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out-active {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+ </style>
+  </head>
+  
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          {% include 'header_nav.html' %}
+
+           
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                <span class="text-muted fw-light">{{ session.role_name }} /</span> Camera List
+              </h4>
+
+          
+
+              <!-- Ajax Sourced Server-side -->
+              <div class="card mt-5">
+                <h5 class="card-header">Camera List</h5>
+
+
+
+                {% if session.role_id == 0 or page_permission %}
+
+                <div class="card-datatable text-nowrap table-responsive">
+                    <table class=" table table-bordered" id="users_table">
+                        <thead>
+                            <tr>
+                                <th>S No</th>
+                                <th>LPU Id</th>
+                                <th>Name</th>
+                                <th>LPU IP</th>                                    
+                                <th>Camera IP</th>                          
+                                <th>Camera Name</th>
+                                <th>Camera Username</th> 
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                             
+                        </tbody>
+                    </table>
+                </div>
+
+
+                {% else %}
+                
+                        <div class=" h-100">
+                            <div class="card-header">
+                                <div class="alert alert-danger" role="alert">
+                                    Access Denied: You do not have the necessary permissions to view this page.
+                                </div>
+                            </div>
+                        </div>
+                        
+                {% endif %}
+
+
+
+                
+
+
+            </div>
+              <!--/ Ajax Sourced Server-side -->
+
+              
+       
+              
+            </div>
+            
+            </div>
+          
+            <div class="content-backdrop fade"></div>
+          </div>
+  
+        </div>
+ 
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+   {% include 'script_file.html' %}
+
+  </body>
+  <script>
+
+    const edit_permission = {{ 'true' if edit_permission else 'false' }};
+    const delete_permission = {{ 'true' if delete_permission else 'false' }};
+    
+    console.log("Edit User permission:", edit_permission);
+    console.log("Delete User permission:", delete_permission);
+
+
+    
+    $(document).ready(function() {
+    const usersTable = $('#users_table').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": "/main/lpu/lpulist/",
+            "dataSrc": "data"
+        },
+        "columns": [
+            {
+                data: null,
+                render: function(data, type, full, meta) {
+                    return meta.row + 1; 
+                }
+            },
+            { "data": "lpu_id" },
+            { "data": "lpu_name" }, 
+            { "data": "lpu_ip" },
+            { "data": "camera_ip" }, 
+            { "data": "camera_name" },
+            { "data": "camera_username" },  
+            {
+                "data": null,
+                render: function(data, type, row) {
+                    return `
+                        <div class="dropdown">
+                            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-dots-vertical-rounded"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item edit-lpu" data-id="${row.id}">
+                                    <i class="bx bx-edit-alt me-1"></i> Edit
+                                </a>
+                                
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        ]
+    });
+    
+    $('#users_table tbody').on('click', '.edit-lpu', function() {
+    const lid = $(this).data('id');  
+    if (!edit_permission) {
+        Swal.fire({
+            title: 'Access Denied!',
+            text: 'You do not have permission to edit LPU.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return; 
+    }
+
+    $.ajax({
+        url: '/main/lpu/status_check',
+        type: 'GET',
+        success: function(response) {
+         
+            window.location.href = `/main/lpu/edit/${lid}`;
+        },
+        error: function(xhr) {
+            if (xhr.status === 400) {
+                Swal.fire({
+                    title: 'KIT is Offline!',
+                    text: 'Cannot add classes.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    });
+});
+
+
+    $('#users_table tbody').on('click', '.delete-lpu', function() {
+        const lpu_id = $(this).data('id'); 
+      
+       
+
+        if (!delete_permission) {
+            Swal.fire({
+                title: 'Access Denied!',
+                text: 'You do not have permission to delete LPU.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return; 
+        }
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/main/lpu/delete/${lpu_id}`,  
+                    type: 'DELETE',
+                    success: function(response) {
+                        Swal.fire('Deleted!', 'LPU deleted successfully!', 'success');
+                        usersTable.ajax.reload();  
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Error deleting LPU.', 'error');
+                    }
+                });
+            }
+        });
+    });
+});
+
+</script>
+
+
+</html>

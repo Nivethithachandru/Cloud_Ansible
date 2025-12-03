@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet">
+    <title>Email Notification</title>
+    <style>
+        @media screen and (max-width: 600px) {
+            .content {
+                width: 100% !important;
+                display: block !important;
+                padding: 10px !important;
+            }
+            .header, .body, .footer {
+                padding: 20px !important;
+            }
+        }
+    </style>
+</head>
+<body style="font-family: 'Poppins', Arial, sans-serif">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center" style="padding: 20px;">
+                
+                <table class="content" width="600" border="0" cellspacing="0" cellpadding="0" style="border-collapse: collapse; border: 1px solid #cccccc;">
+                    <tr>
+                        <td class="header" style="background-color: #345C72; padding: 40px; text-align: center; color: white; font-size: 24px;">
+                            {{ subject }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body" style="padding: 40px; text-align: left; font-size: 16px; line-height: 1.6;">
+                            {{ greeting }}, <br><br>
+                            {% if camera_ip and camera_status %}
+                                We wanted to inform you that <strong>Camera (IP Address: {{ camera_ip }})</strong> is currently <strong>{{ camera_status }}</strong>. <br>
+                                The system has flagged this issue for immediate attention, with LPU ID: <strong>{{ lpu_id }}</strong> and LPU Name: <strong>{{ lpu_name }}</strong>.
+                            {% elif kit_status %}
+                                We wanted to inform you that the <strong>Kit</strong> status is currently <strong>{{ kit_status }}</strong>. <br>
+                                The system has flagged this issue for immediate attention, with LPU IP: <strong>{{ lpu_ip }}</strong> and LPU Name: <strong>{{ lpu_name }}</strong>.
+                            {% elif total_disk_gb and used_disk_gb and free_disk_gb %}
+                                We wanted to inform you that the storage status is currently <strong>{{ storage_status }}</strong>. <br>
+                                <br>
+                                Total Disk Space: <strong>{{ total_disk_gb }} GB</strong> <br>
+                                Used Disk Space: <strong>{{ used_disk_gb }} GB</strong> <br>
+                                Free Disk Space: <strong>{{ free_disk_gb }} GB</strong> <br>
+                                <br>
+                                The system has flagged this issue for immediate attention, with LPU ID: <strong>{{ lpu_id }}</strong> and LPU Name: <strong>{{ lpu_name }}</strong>.
+                            {% elif cpu_temperature %}
+                                We wanted to inform you that the current CPU Temperature is <strong>{{ cpu_temperature }}°C</strong>. Please take necessary action immediately.<br>
+                                The system has flagged this issue for immediate attention, with LPU ID: <strong>{{ lpu_id }}</strong> and LPU Name: <strong>{{ lpu_name }}</strong>.
+                            {% else %}
+                                No relevant information available at this time.
+                            {% endif %}
+                            <br><br>
+                            Please check the status and resolve the issue as soon as possible to ensure uninterrupted service. If you need assistance, feel free to contact our support team.
+                            <br><br>
+                            <!-- Best regards, <br>
+                            {{ sender_name }} -->
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="footer" style="background-color: #333333; padding: 40px; text-align: center; color: white; font-size: 14px;">
+                            &copy; COS AI Copyright 2024. All Rights Reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

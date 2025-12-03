@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+    <style>
+
+      .alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      .alert {
+          padding: 10px;
+          margin: 10px 0;
+          border-radius: 5px;
+          font-size: 16px;
+      }
+      
+      .alert-success {
+          background-color: #d4edda;
+          color: #155724;
+      }
+      
+      .alert-danger {
+          background-color: #f8d7da;
+          color: #721c24;
+      }
+      
+      .alert-info {
+          background-color: #d1ecf1;
+          color: #0c5460;
+      }
+      
+          </style>
+ 
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+                <h4 class="py-3 breadcrumb-wrapper mb-4">
+                    <span class="text-muted fw-light">{{ session.role_name }} /</span> Camera Assesments
+                </h4>
+                <div class="row mb-4">
+                    <div class="col-lg-6 col-md-8 col-sm-12">
+                      <div class="card">
+                        <h5 class="card-header">Update Camera Group</h5>
+                        <div class="card-body">
+                            
+                            {% if message %}
+                                <div class="alert alert-success" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                            
+                            <form id="role_assesstion_update" action="/main/lpu/update/{{ lpu.id }}" method="post">
+                                <div id="loadingMessage" class="alert alert-info" style="display: none;"></div>
+                                <div id="alertMessage" style="display: none;" class="mb-3 mt-3"></div>
+                              
+                              <div class="mb-3">
+                                  <label class="form-label" for="camera_ip">Camera IP</label>
+                                  <input type="text" class="form-control" id="camera_ip" name="camera_ip" value="{{ lpu.camera_ip }}" required />
+                              </div>
+                              <div class="mb-3">
+                                  <label class="form-label" for="camera_name">Camera Name</label>
+                                  <input type="text" class="form-control" id="camera_name" name="camera_name" value="{{ lpu.camera_name }}" required />
+                              </div>
+                              <div class="mb-3">
+                                <label class="form-label" for="camera_port">Camera Port</label>
+                                <input type="text" class="form-control" id="camera_port" name="camera_port" value="{{ lpu.camera_port }}" required />
+                              </div>
+                              <div class="mb-3">
+                                  <label class="form-label" for="camera_username">Camera Username</label>
+                                  <input type="text" class="form-control" id="camera_username" name="camera_username" value="{{ lpu.camera_username }}" required />
+                              </div>
+                              <div class="mb-3">
+                                  <label class="form-label" for="camera_password">Camera Password</label>
+                                  <input type="password" class="form-control" id="camera_password" name="camera_password" value="{{ lpu.camera_password }}" required />
+                              </div>
+                          
+                              <div class="row">
+                                  <div class="col-12">
+                                      <button type="submit" class="btn btn-primary">Submit</button>
+                                  </div>
+                              </div>
+                          </form>
+                          
+                        </div>
+                    </div>
+                      </div>
+                </div>
+            </div>
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+    <script>
+
+function showAlert(message, type = 'danger') {
+            const alertMessageDiv = document.getElementById('alertMessage');
+            alertMessageDiv.style.display = 'block';
+            alertMessageDiv.innerText = message;
+            alertMessageDiv.style.color = 'white';
+            alertMessageDiv.style.backgroundColor = type === 'danger' ? 'red' : 'green';
+            alertMessageDiv.style.padding = '10px';
+            alertMessageDiv.style.borderRadius = '5px';
+            setTimeout(function() {
+                alertMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+document.getElementById("role_assesstion_update").addEventListener("submit", function(event) {
+    event.preventDefault(); 
+
+    let camera_ip = document.getElementById("camera_ip").value;
+    let id="{{ lpu.id }}"
+  
+
+    fetch(`/check_camera_ip?camera_ip=${encodeURIComponent(camera_ip)}&id=${encodeURIComponent(id)}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.exists) {
+            showAlert(`The LPU IP '${camera_ip}' already exists. Please use a different IP.`, 'danger');
+        } else {
+            event.target.submit(); 
+        }
+    })
+    .catch(error => {
+        console.error("Error checking LPU IP:", error);
+        showAlert("An error occurred while checking the LPU IP. Please try again.", 'danger');
+    });
+});
+
+        
+
+      function dbupdate() {
+    fetch("/lpu_status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.lpu_status === true) {
+            Toastify({
+                text:  "LPU Data Updated in Local DB!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 9000);
+    </script>
+  </body>
+ 
+</html>

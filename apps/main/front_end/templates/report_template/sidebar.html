@@ -1,0 +1,471 @@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <div class="app-brand demo">
+    <!--<a href="#" class="app-brand-link">
+      <img src="{{ url_for('static', path='assets/site_logo/logo3.png') }}" alt="Logo" width="145" height="70" class="app-brand-text demo menu-text fw-bold ms-2 mt-2" />
+
+      <span class="app-brand-text demo menu-text fw-bold ms-2"> RVTL </span>
+    </a>-->
+    <a href="javascript:void(0);" class="app-brand-link">
+      <img src="{{ url_for('static', path='assets/site_logo/sesha_logo.png') }}" alt="Logo" width="80%" class="app-brand-text demo menu-text fw-bold ms-2 mt-2" />
+      <!-- <img src="https://vms.cosai.in/assets/img/favicon/favicon1.ico" width="30px" height="30px">              
+      <span class="app-brand-text demo menu-text fw-bold ms-2">COS AI</span> -->
+    </a>
+    
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+      <i class="bx menu-toggle-icon d-none d-xl-block fs-4 align-middle"></i><i class="bx bx-x d-block d-xl-none bx-sm align-middle"></i>
+    </a>
+    
+  </div>
+
+  
+<small  href="#" class="text-danger fw-bold" style="margin-left: 30px; font-size: 13px;">
+    Automatic Traffic Count and Classifier
+</small>
+  
+  <!-- <small  href="#" class=" fw-bold" style="margin-left: 30px; font-size: 10px;">COS AI</small> -->
+  <div class="menu-divider mt-0"></div>
+
+  <div class="menu-inner-shadow"></div>
+
+  {% if session.role_id == 0 %}
+  <ul class="menu-inner py-1">
+    <!-- superadmin for side nav -->
+
+    <li class="menu-header  fw-bold text-uppercase"><span class="menu-header-text">
+      {{ session.role_name }}      
+    </span></li>
+
+
+
+     
+    <li class="menu-item {% if request.url.path == '/auth/organization_list' %}active{% endif %}">
+        <a href="{{ url_for('organization') }}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+            <div data-i18n="Organization">Organization</div>
+        </a>
+    </li>
+   
+    
+<!-- 
+    <li class="menu-header fw-bold text-uppercase"><span class="menu-header-text">General</span></li>
+     
+    
+
+
+
+    <li class="menu-item {% if 'roles' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-food-menu"></i>
+        <div data-i18n="Role Management">Role Management</div>
+      </a>
+      <ul class="menu-sub">
+
+
+        <li class="menu-item {% if request.url.path == '/main/roles/' %}active{% endif %}">
+          <a href="{{ url_for('main.roles_management') }}" class="menu-link">
+            <div data-i18n="Add Role">Add Role</div>
+          </a>
+        </li>
+        <li class="menu-item {% if request.url.path == '/main/roles/list/' %}active{% endif %}">
+          <a href="{{ url_for('main.roles_preview') }}" class="menu-link">
+            <div data-i18n="List Roles">List Roles</div>
+          </a>
+        </li>        
+      </ul>
+    </li>
+
+
+    <li class="menu-item {% if 'user' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-user"></i>
+        <div data-i18n="User Management">User Management</div>
+      </a>
+      <ul class="menu-sub">
+
+        <li class="menu-item {% if request.url.path == '/main/user/' %}active{% endif %}">
+          <a href="{{ url_for('main.users_management') }}" class="menu-link">
+              <div data-i18n="Add User">Add User</div>
+            </a>
+        </li>
+
+        <li class="menu-item {% if request.url.path == '/main/user/list/' %}active{% endif %}">
+          <a href="{{ url_for('main.user_preview')}}" class="menu-link">
+            <div data-i18n="List Users">List Users</div>
+          </a>
+        </li>        
+      </ul>
+    </li>
+
+
+    <li class="menu-item {% if 'modules' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-box"></i>
+        <div data-i18n="Modules ">Modules</div>
+      </a>
+      <ul class="menu-sub">
+
+        <li class="menu-item {% if request.url.path == '/main/modules/' %}active{% endif %}">
+          <a href="{{ url_for('main.modules_management') }}" class="menu-link">
+              <div data-i18n="Add Modules">Add Modules</div>
+            </a>
+        </li>
+        <li class="menu-item {% if request.url.path == '/main/modules/list/' %}active{% endif %}">
+          <a href="{{ url_for('main.modules_preview')}}" class="menu-link">
+            <div data-i18n="List Modules">List Modules</div>
+          </a>
+        </li>        
+      </ul>
+    </li>
+
+
+    <li class="menu-item {% if 'lpu' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-library"></i>
+        <div data-i18n="LPU Management">LPU Management</div>
+      </a>
+      <ul class="menu-sub">
+
+        <li class="menu-item {% if request.url.path == '/main/lpu/' %}active{% endif %}">
+          <a href="{{ url_for('auth.lpu_management') }}" class="menu-link">
+              <div data-i18n="Add LPU">Add LPU</div>
+            </a>
+        </li>
+
+        <li class="menu-item {% if request.url.path == '/main/lpu/list/' %}active{% endif %}">
+          <a href="{{ url_for('auth.lpu_preview')}}" class="menu-link">
+            <div data-i18n="List LPU">List LPU</div>
+          </a>
+        </li>        
+      </ul>
+    </li>
+
+
+    <li class="menu-item {% if 'classes' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-add-to-queue"></i>
+        <div data-i18n="Classes">Classes</div>
+      </a>
+      <ul class="menu-sub">       
+        <li class="menu-item {% if request.url.path == '/main/classes/list/' or request.url.path == '/main/classes/' %}active{% endif %}">
+          <a href="{{ url_for('main.classes_preview') }}" class="menu-link">
+            <div data-i18n="Customs Class List">Customs Class List</div>
+          </a>
+        </li>        
+        <li class="menu-item {% if request.url.path == '/main/group/cust_classes/' %}active{% endif %}">
+          <a href="{{ url_for('main.group_class_management')}}" class="menu-link">
+            <div data-i18n="Group Class">Group Class</div>
+          </a>
+        </li>        
+      </ul>
+    </li>
+
+
+    <li class="menu-item {% if request.url.path == '/main/lpu_view_monitor/' %}active{% endif %}">
+      <a href="{{ url_for('main.lpu_view_monitor') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-video"></i>
+        <div data-i18n="Live View Monitoring">Live View Monitoring</div>
+      </a>    
+    </li>
+  
+
+
+    <li class="menu-item {% if 'realtime' in request.url.path %}open{% endif %}">
+      
+      <ul class="menu-sub">       
+        <li class="menu-item {% if request.url.path == '/main/realtime/hourlyreport/' %}active{% endif %}">
+          <a href="{{ url_for('main.hourlyreport') }}" class="menu-link">
+            <div data-i18n="View Report">View Report</div>
+          </a>
+        </li>        
+           
+      </ul>
+    </li>
+
+
+  
+    
+    <li class="menu-item {% if request.url.path == '/main/map_permission/' %}active{% endif %}">
+      <a href="{{ url_for('main.map_permis') }}" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-shield"></i>
+        <div data-i18n="Permission Mapping">Permission  Mapping</div>
+      </a>             
+    </li>
+    
+
+    <li class="menu-item  {% if 'audit' in request.url.path %}open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon tf-icons bx bx-box"></i>
+        <div data-i18n="Audit">Audit</div>
+      </a>
+      <ul class="menu-sub">
+      
+        <li class="menu-item {% if request.url.path == '/main/report/audit/' %}active{% endif %} ">
+          <a href="{{ url_for('main.report_preview') }}" class="menu-link">
+
+            <div data-i18n="Audit Report">Audit Report</div>
+          </a>             
+        </li>
+
+        <li class="menu-item {% if request.url.path == '/main/report/audit_transaction/' %}active{% endif %} ">
+          <a href="{{ url_for('main.report_list_preview') }}" class="menu-link">
+            <div data-i18n="Audit Transaction">Audit Transaction</div>
+          </a>             
+        </li>
+
+
+      </ul>
+     </li>   
+
+  <li class="menu-item {% if request.url.path == '/main/logs/list/' or request.url.path == '/main/logs/' %}active{% endif %}">
+    <a href="{{ url_for('main.logs_preview') }}" class="menu-link">
+      <i class="menu-icon tf-icons fas fa-clipboard-list"></i>
+      <div data-i18n="Actions Loggs">Actions Loggs</div>
+    </a>    
+  </li>
+
+   
+
+    
+  </ul> -->
+  {% else %}
+
+    <!-- Rols for side nav -->
+
+
+  <ul class="menu-inner py-1">
+
+    <li class="menu-header  fw-bold text-uppercase"><span class="menu-header-text">
+      {{ session.role_name }}      
+    </span></li>
+
+    
+     
+    <li class="menu-item ">
+        <a href="{{ url_for('auth.dashboard') }}" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-home-circle"></i>
+            <div data-i18n="Dashboards">Dashboards</div>
+        </a>
+    </li>
+              
+
+    
+
+
+
+    
+    <li class="menu-header fw-bold text-uppercase"><span class="menu-header-text">General</span></li>
+     
+    {% if session.role_info and session.role_info.modules %}
+        {% for module in session.role_info.modules %}
+
+            {% if module.module_id == 1 %}
+                {% if module.permissions.show %}
+                  <!-- <li class="menu-item {% if 'roles' in request.url.path %}open{% endif %}">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                      <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                      <div data-i18n="Role Management">Role Management</div>
+                    </a>
+                    <ul class="menu-sub">
+                      <li class="menu-item {% if request.url.path == '/main/roles/' %}active{% endif %}">
+                        <a href="{{ url_for('main.roles_management') }}" class="menu-link">
+                          <div data-i18n="Add Role">Add Role</div>
+                        </a>
+                      </li>
+                      <li class="menu-item {% if request.url.path == '/main/roles/list/' %}active{% endif %}">
+                        <a href="{{ url_for('main.roles_preview') }}" class="menu-link">
+                          <div data-i18n="List Roles">List Roles</div>
+                        </a>
+                      </li>        
+                    </ul>
+                  </li> -->
+
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 2 %}
+                {% if module.permissions.show %}
+                <!-- <li class="menu-item {% if 'user' in request.url.path %}open{% endif %}">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div data-i18n="User Management">User Management</div>
+                  </a>
+                  <ul class="menu-sub">
+                    <li class="menu-item {% if request.url.path == '/main/user/' %}active{% endif %}">
+                      <a href="{{ url_for('main.users_management') }}" class="menu-link">
+                          <div data-i18n="Add User">Add User</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {% if request.url.path == '/main/user/list/' %}active{% endif %}">
+                      <a href="{{ url_for('main.user_preview')}}" class="menu-link">
+                        <div data-i18n="List Users">List Users</div>
+                      </a>
+                    </li>        
+                  </ul>
+                </li> -->
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 3 %}
+                {% if module.permissions.show %}
+                <!-- <li class="menu-item {% if 'modules' in request.url.path %}open{% endif %}">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-box"></i>
+                    <div data-i18n="Modules ">Modules</div>
+                  </a>
+                  <ul class="menu-sub">
+                    <li class="menu-item {% if request.url.path == '/main/modules/' %}active{% endif %}">
+                      <a href="{{ url_for('main.modules_management') }}" class="menu-link">
+                          <div data-i18n="Add Modules">Add Modules</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {% if request.url.path == '/main/modules/list/' %}active{% endif %}">
+                      <a href="{{ url_for('main.modules_preview')}}" class="menu-link">
+                        <div data-i18n="List Modules">List Modules</div>
+                      </a>
+                    </li>        
+                  </ul>
+                </li> -->
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 4 %}
+                {% if module.permissions.show %}
+                <!-- <li class="menu-item {% if 'lpu' in request.url.path %}open{% endif %}">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-library"></i>
+                    <div data-i18n="LPU Management">LPU Management</div>
+                  </a>
+                  <ul class="menu-sub">
+                    <li class="menu-item {% if request.url.path == '/main/lpu/' %}active{% endif %}">
+                      <a href="{{ url_for('auth.lpu_management') }}" class="menu-link">
+                          <div data-i18n="Add LPU">Add LPU</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {% if request.url.path == '/main/lpu/list/' %}active{% endif %}">
+                      <a href="{{ url_for('auth.lpu_preview')}}" class="menu-link">
+                        <div data-i18n="List LPU">List LPU</div>
+                      </a>
+                    </li>        
+                  </ul>
+                </li> -->
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 5 %}
+                {% if module.permissions.show %}
+                <!-- <li class="menu-item {% if 'classes' in request.url.path %}open{% endif %}">
+                  <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-add-to-queue"></i>
+                    <div data-i18n="Classes">Classes</div>
+                  </a>
+                  <ul class="menu-sub">
+                   
+                    <li class="menu-item {% if request.url.path == '/main/classes/list/' or request.url.path == '/main/classes/' %}active{% endif %}">
+                      <a href="{{ url_for('main.classes_preview') }}" class="menu-link">
+                        <div data-i18n="Customs Class List">Customs Class List</div>
+                      </a>
+                    </li>
+                    
+                  
+                  </ul>
+                </li> -->
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}                
+    
+    
+
+    
+
+  
+ 
+  
+
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 6 %}
+                {% if module.permissions.show %}
+                <!-- <li class="menu-item {% if request.url.path == '/main/lpu_view_monitor/' %}active{% endif %}">
+                  <a href="{{ url_for('main.lpu_view_monitor') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-video"></i>
+                    <div data-i18n="Live View Monitoring">Live View Monitoring</div>
+                  </a>    
+              </li> -->
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+    {% if session.role_info %}
+        {% for module in session.role_info.modules %}
+            {% if module.module_id == 7 %}
+                {% if module.permissions.show %}
+                  <!-- <li class="menu-item {% if request.url.path == '/main/group/cust_classes/' %}active{% endif %}">
+                    <a href="{{ url_for('main.group_class_management')}}" class="menu-link">
+                      <i class="menu-icon tf-icons bx bx-group"></i>
+                      <div data-i18n="Group Class">Group Class</div> -->
+
+                    </a>             
+                  </li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    
+
+    {% if session.role_info %}
+    {% for module in session.role_info.modules %}
+        {% if module.module_id == 8 %}
+            {% if module.permissions.show %}
+            <!-- <li class="menu-item">
+              <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-box"></i>
+                <div data-i18n="Audit">Audit</div>
+              </a>
+              <ul class="menu-sub">
+              
+                <li class="menu-item  ">
+                  <a href="{{ url_for('main.report_preview') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bxs-book-content"></i>
+                    <div data-i18n="Audit Report">Audit Report</div>
+                  </a>             
+                </li>
+        
+              </ul>
+          </li>   -->
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+</ul>
+
+{% endif %}
+</aside>
+
+ 

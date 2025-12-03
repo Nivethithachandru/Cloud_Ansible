@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html
+  lang="en"
+  class="light-style layout-navbar-fixed layout-menu-fixed"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="{{ url_for('static', path='/assets/') }}" 
+  data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+    <style>
+       .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .alert-msg {
+            background-color: #f44336; /* Red */
+            color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            animation-duration: 0.6s;
+            position: relative;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide-in {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .slide-in-active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-out-active {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+   </style>
+  </head>
+
+  <body>
+
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        {% include 'side_nav.html' %}
+        <div class="layout-page">
+          {% include 'header_nav.html' %}
+          <div class="content-wrapper">
+            <!-- Content -->
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4">
+                  <span class="text-muted fw-light">{{ session.role_name }} /</span> Draw Line
+              </h4>
+              <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+              
+
+
+                    <div class="card mt-5">
+                    <h5 class="card-header">Analytics</h5>
+     
+                    <div class="card-datatable text-nowrap table-responsive">
+                        <table class=" table table-bordered" id="users_table">
+                            <thead>
+                                <tr>
+                                    <th>S.no</th>
+                                    <th>Project ID</th>
+                                    <th>Project Name</th>
+                                    <th>Camera IP</th>
+                                    <th>Select Camera</th> 
+                                    <th>Actions</th>
+                                    <th>Draw</th>
+                                  
+                                </tr>
+                               
+                            </thead>
+                            <tbody>
+                                 
+                            </tbody>
+                        </table>
+                    </div>
+              </div>
+
+
+              
+          </div>
+
+          <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+          
+            
+            <!-- / Content -->
+
+            
+
+            <div class="content-backdrop fade"></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <div class="drag-target"></div>
+    </div>
+
+
+    {% include 'script_file.html' %}
+    
+  </body>
+  <script>
+
+
+// document.addEventListener("DOMContentLoaded", function () {
+
+// async function fetchcameras() {
+//   try {
+//     const response = await fetch('/available_cameras');
+//     if (!response.ok) throw new Error('Network response was not ok');
+//     const kits = await response.json();
+   
+//     kits.forEach(kit => {
+//       kitSelect.append(new Option(kit.project_name, kit.project_id));
+//     });
+//   } catch (error) {
+//     console.error('There was a problem with the fetch operation:', error);
+//   }
+// }
+
+// fetchcameras();
+
+// })
+
+
+$(document).ready(function() {
+    const usersTable = $('#users_table').DataTable({
+        "processing": true,
+        "serverSide": false,
+        "ajax": {
+            "url": "/main/draw_list",
+            "dataSrc": "data"
+        },
+        "columns": [
+            {
+                data: null,
+                render: function(data, type, full, meta) {
+                    return meta.row + 1; 
+                }
+            },
+            { "data": "project_id" }, 
+            { "data": "project_name" },
+            { "data": "camera_ip" }, 
+            {
+    "data": "available_cameras",
+    render: function(data, type, row) {
+        let dropdown = `<select class="form-control" onchange="handleCameraSelection(this, ${row.project_id})">`;
+
+        dropdown += `<option value="">Select camera</option>`; 
+        data.forEach(function(ip) {
+            dropdown += `<option value="${ip}" ${ip === row.selected_camera_ip ? 'selected' : ''}>${ip}</option>`;
+        });
+
+        dropdown += '</select>';
+
+        return dropdown;
+    }
+}, 
+
+
+
+                
+            {
+                data: null,
+                render: function(data) {
+                    // return `
+                    //     <div class="d-flex align-items-center">
+                    //         <select class="form-control me-2" id="action_select_${data.project_id}">
+                    //             <option value="">Select Action</option>
+                    //             <option value="draw_line">Draw Line</option>
+                    //              <option value="polygon">Polygon</option>
+                    //         </select>
+                          
+                    //     </div>
+                    // `;
+                     return `
+                        <div class="d-flex align-items-center">
+                            <select class="form-control me-2" id="action_select_${data.project_id}">
+                                <option value="">Select Action</option>
+                                <option value="draw_line">Draw Line</option>
+                             </select> 
+                        </div>
+                    `;
+                }
+            },
+            {
+                data: null,
+                render: function(data) {
+                    return `
+                       
+                            <button class="btn btn-success" onclick="Draw('${data.project_id}')">Draw</button>
+                      
+                    `;
+                }
+            },
+            
+            
+        ]
+    });
+        
+    
+            });
+      
+
+let selectedCameraIp;
+function handleCameraSelection(selectElement, project_id) {
+     selectedCameraIp = selectElement.value;
+  
+}
+function Draw(project_id) {
+    let actionSelect = document.getElementById(`action_select_${project_id}`);
+    let selectedAction = actionSelect.value;
+    if (selectedAction === "draw_line") {
+        line(project_id);
+    } 
+    // else if (selectedAction === "polygon") {
+    //     polygon(project_id);
+    // } 
+    else {
+        alertHandler('Please select a valid action.', false);
+    }
+}
+
+async function line(project_id) {
+    console.log("dropdown:",selectedCameraIp)
+    if (!selectedCameraIp ) {
+        alertHandler('Please select the camera.', false);
+        return;
+    }
+    const url = `/main/drawline/frame/${project_id}/${encodeURIComponent(selectedCameraIp)}`;
+    window.location.href = url;
+}
+
+async function polygon(project_id) {
+    console.log("dropdown:",selectedCameraIp)
+    if (!selectedCameraIp ) {
+        alertHandler('Please select the camera.', false);
+        return;
+    }
+    const url = `/main/polygon/frame/${project_id}/${encodeURIComponent(selectedCameraIp)}`;
+    window.location.href = url;
+}
+
+function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; // Change class based on success or failure
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+
+    // Append the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // Trigger the slide-in effect
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+
+    // Remove the alert after some time
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+
+        // Remove the alert from the DOM after animation
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); // Duration before the alert starts to fade out
+}
+</script>
+
+ </html>

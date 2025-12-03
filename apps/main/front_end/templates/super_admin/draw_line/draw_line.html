@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+
+<html lang="en"
+ class="light-style layout-navbar-fixed layout-menu-fixed" 
+ dir="ltr" data-theme="theme-default" data-assets-path="{{ url_for('static', path='/assets/') }}" data-template="vertical-menu-template">
+  <head>
+    {% include 'header_file.html' %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  </head>
+  <style>
+.alert-msg {
+    background-color: #f44336; /* Red */
+    color: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    animation-duration: 0.6s;
+    position: relative;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.slide-in {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.slide-in-active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-out-active {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+table th,
+table td {
+  padding: .625em;
+  text-align: center;
+}
+
+.alert-msg {
+          background-color: #f44336; /* Red */
+          color: white;
+          padding: 15px;
+          margin: 10px 0;
+          border-radius: 5px;
+          animation-duration: 0.6s;
+          position: relative;
+          transition: opacity 0.5s ease, transform 0.5s ease;
+      }
+      
+      .slide-in {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .slide-in-active {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      
+      .slide-out-active {
+          opacity: 0;
+          transform: translateY(-20px);
+      }
+      
+      .alert-success {
+        background-color: #4CAF50; 
+      }
+
+
+
+    </style>
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        {% include 'side_nav.html' %}
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+
+          <nav class="layout-navbar navbar navbar-expand-xl align-items-center bg-navbar-theme" id="layout-navbar">
+            <div class="container-fluid">
+              <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                  <i class="bx bx-menu bx-sm"></i>
+                </a>
+              </div>
+
+              <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+                
+
+                <ul class="navbar-nav flex-row align-items-center ms-auto">
+                 
+                  <!-- Style Switcher -->
+                  <li class="nav-item me-2 me-xl-0">
+                    <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
+                      <i class="bx bx-sm"></i>
+                    </a>
+                  </li>
+                  <!--/ Style Switcher -->
+
+                </ul>
+              </div>
+
+            </div>
+          </nav>
+
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+
+            <div class="container-xxl flex-grow-1 container-p-y">
+              <h4 class="py-3 breadcrumb-wrapper mb-4"><span class="text-muted fw-light">MOVABLE /</span> ROI Service</h4>
+              
+
+<!-- =================================================================================================================== -->
+              <div class="row g-4 mb-4 ">              
+                <!-- Draw line roi service-->
+                <div class="col-md-12 col-lg-12 col-xl-12 mb-4 mb-xl-0">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between ">
+                      <div>
+                        <h5 class="card-title mb-0">ROI Service</h5>
+                        <small class="text-muted">Draw Line on image</small>
+                      </div>
+                      <div class="btn-group" id="dropdown-icon-demo">
+                  
+                      <ul class="dropdown-menu" aria-labelledby="ip_select" id="dropdown_menu">
+                      
+                      </ul>
+                      
+
+                      
+
+                        <ul class="dropdown-menu dropdown-menu-end dropdown">
+                            <li class="dropdown-item d-flex align-items-center btn-section-block-custom"> </li>
+                        
+                          </ul>
+
+                      </div>
+
+                    </div>
+                    <div class="card-body">
+                      <!-- <p class="points-info">No points yet</p> -->
+                      <!-- Block Ui Section-->
+
+                      <div id="section-block" class="loading_section">
+                        <!-- Loading indicator -->
+                        <p id="camera_message_above"   style="text-align: center;" >Select Camera and then Get a current frame</p>                        
+                        <div id="image-container"></div>
+               
+                      </div>
+                      
+                      
+                            <div class=" p-3" id="section-block" style="display: none;"> </div>
+                            <p class="points-info" id="point_info" style="display: none;">No points yet</p>
+                            <div id="canvas_measure" style="overflow: auto; max-width: 100%;">
+                              <canvas id="draw_line" style="display: none;"></canvas>
+                            </div>
+                            <div id="loading-indicator" style="display: none;">
+                              <div class="d-flex justify-content-center">
+                                <p class="mb-0">Please wait...</p>
+                                <div class="sk-wave m-0">
+                                  <div class="sk-rect sk-wave-rect"></div>
+                                  <div class="sk-rect sk-wave-rect"></div>
+                                  <div class="sk-rect sk-wave-rect"></div>
+                                  <div class="sk-rect sk-wave-rect"></div>
+                                  <div class="sk-rect sk-wave-rect"></div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                            <div class="d-flex justify-content-left pt-3">
+                            <button type="button" class="btn btn-primary me-2" id="previous_button" style="display: none;" onclick="previous_back()">change project</button>
+                            <button type="button" class="btn btn-primary me-2" id="update_button" style="display: none;" onclick="submitForm()" >Save</button>
+                            </div></div>
+                          </div>
+
+                          </div>
+
+                      <!-- /Block Ui Section-->        
+                </div>
+                <div class="col-md-12 col-lg-12 col-xl-12 mb-4 mb-xl-0" id="roi_lines_show" style="">
+                  <div class="card h-100">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                      <div class="card-title mb-0">
+                        <h5 class="m-0 me-2">ROI Coordinates</h5>
+                        <small class="text-muted">Existing & Update ROI</small>
+                      </div>                      
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="nav-align-top">
+  
+
+                        <div class="tab-content border-0 border-top pb-0">
+                          
+                            <div class="table-responsive">
+                            
+                              
+                              <table class="table border-top" id="roiTable">
+                                <thead>
+                                  
+                                  <tr>
+                                    <th>Select</th>
+                                    <th>Map</th>
+                                    <th>Lines</th>
+                                    <th>Top x</th>
+                                    <th>Top y</th>
+                                    <th>btm x</th>
+                                    <th>btm y</th>   
+                                    <th>Direction</th>
+                                    <th>Actions</th> 
+                                 
+                                  </tr>
+                                </thead>
+                                 
+                                  <tbody>
+                                    <tr id="line_1_row">   
+                                        <td><input type="checkbox" class="form-check-input" data-idname="selected_up"></td>
+<td><input type="checkbox" class="form-check-input roi_map_check" data-idname="line_id_1"></td>
+
+                                        <td><span class="text-danger"><p >Line 1 </p></span></td>
+
+                                        <td class="mr-3"><span class="text-success"><p id="topx_1"> </p></span></td>
+                                        <td><span class="text-success"><p id="topy_1"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomx_1"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomy_1"> </p></span></td>
+                                        <td><input   type="text" class="form-control" id="direction_1" placeholder="UP"required readonly /></td>
+                                        <td><button class="btn btn-sm btn-outline-danger" onclick="clearLine(1)">Clear</button></td>
+                                    </tr>
+                                    <tr id="line_2_row">                                      
+                                        <td><input type="checkbox" class="form-check-input" data-idname="selected_down"></td>
+<td><input type="checkbox" class="form-check-input roi_map_check" data-idname="line_id_2"></td>
+                                        <td><span class="text-danger"><p >Line 2 </p></span></td>
+                                        <td><span class="text-success"><p id="topx_2"> </p></span></td>
+                                        <td><span class="text-success"><p id="topy_2"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomx_2"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomy_2"> </p></span></td>
+                                        <td><input  type="text"  class="form-control" id="direction_2" placeholder="DOWN" required readonly /> </td>
+                                        <td><button class="btn btn-sm btn-outline-danger" onclick="clearLine(2)">Clear</button></td>
+                                    </tr>
+                                    <tr id="line_3_row">
+                                        <td><input type="checkbox" class="form-check-input" data-idname="selected_both"></td>
+<td><input type="checkbox" class="form-check-input roi_map_check" data-idname="line_id_3"></td>
+                                        <td><span class="text-danger"><p >Line 3 </p></span></td>
+                                        <td><span class="text-success"><p id="topx_3"> </p></span></td>
+                                        <td><span class="text-success"><p id="topy_3"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomx_3"> </p></span></td>
+                                        <td><span class="text-success"><p id="bottomy_3"> </p></span></td>
+                                        <td><input  type="text" class="form-control" id="direction_3" placeholder="BOTH" required readonly /> </td>
+                                        <td><button class="btn btn-sm btn-outline-danger" onclick="clearLine(3)">Clear</button></td>
+                                    </tr>
+                                     
+                                </tbody> 
+                              
+                               
+                              </table>
+                             
+                              
+                            </div>
+                            <div  id="store_existing_linesdic"></div>
+
+                          
+                            
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+                </div>
+                <!-- Draw line roi service -->
+
+              </div>
+              <!-- Users List Table -->
+ <!-- =================================================================================================================== -->
+
+            </div>
+            <!-- / Content -->
+
+            <div id="alert-container" style="position: fixed; top: 50px; right: 50px; z-index: 1000;"></div>
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+      <div class="drag-target"></div>
+    </div>
+    <!-- / Layout wrapper -->
+
+    {% include 'script_file.html' %}
+  </body>
+  
+
+<script>
+let selectedLineNumbers = [];
+let selectedLineNumber = null;
+let isDrawingEnabled = false;
+let clickPoints = [];
+let clickCount = 0;
+
+let storedLines = {};
+let baseImage = null;
+let canvasContext = null;
+let canvasElement = null;
+
+const detectionStatus = JSON.parse('{{ detection_status | tojson | safe }}');
+const projectId = "{{ project_id }}";
+const cameraIp = "{{ camera_ip }}";
+
+const loadingIndicator = document.getElementById('loading-indicator');
+const camera_message_above = document.getElementById('camera_message_above');
+const roi_lines_show = document.getElementById('roi_lines_show');
+const updateButton = document.getElementById('update_button');
+const store_existing_linesdic = document.getElementById('store_existing_linesdic');
+
+roi_lines_show.style.display = 'none';
+updateButton.style.display = 'none';
+store_existing_linesdic.style.display = 'none';
+
+const checkboxMap = {
+    1: "selected_up",
+    2: "selected_down",
+    3: "selected_both"
+};
+
+$(document).ready(function () {
+
+    $('.roi_map_check').on('change',function(){
+        const clickedRoiCheckbox = $(this);
+        const map_roi_selected = clickedRoiCheckbox.data("idname");
+        console.log("Selected name",map_roi_selected)
+    });
+
+    $('.form-check-input').on('change', function () {
+        const clickedCheckbox = $(this);
+        const roi_selected_name = clickedCheckbox.data("idname");
+
+        
+        const lineMap = {
+            'selected_up': 1,
+            'selected_down': 2,
+            'selected_both': 3
+        };
+
+        const requestedLineNumber = lineMap[roi_selected_name];
+
+        if (clickedCheckbox.prop("checked")) {
+            if (storedLines[requestedLineNumber]) {
+                alert("Line already exists. Clear it before redrawing.");
+                clickedCheckbox.prop('checked', false);
+                return;
+            }
+            selectedLineNumbers.push(requestedLineNumber);
+        } else {
+            selectedLineNumbers = selectedLineNumbers.filter(num => num !== requestedLineNumber);
+            delete storedLines[requestedLineNumber];
+        }
+
+        isDrawingEnabled = selectedLineNumbers.length > 0;
+        clickPoints = [];
+        clickCount = 0;
+
+        if (requestedLineNumber === 1) $('#direction_1').val('UP');
+        else if (requestedLineNumber === 2) $('#direction_2').val('DOWN');
+        else if (requestedLineNumber === 3) $('#direction_3').val('BOTH');
+    });
+
+    getFrame(cameraIp, projectId);
+});
+
+function drawArrowhead(ctx, fromX, fromY, toX, toY) {
+    const angle = Math.atan2(toY - fromY, toX - fromX);
+    const size = 8;
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - size * Math.cos(angle - Math.PI / 6), toY - size * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(toX - size * Math.cos(angle + Math.PI / 6), toY - size * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fillStyle = "blue";
+    ctx.fill();
+}
+
+async function checkMappedAndDisable(lineId) {
+    try {
+        console.log("kishorrrrrrrrrrrrrrrrrrrras",lineId)
+        const response = await fetch('/main/roi_unmap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                project_id: projectId,
+                lineNumber: lineId,
+                camera_ip: cameraIp
+            })
+        });
+
+        const result = await response.json();
+        const isMapped = !response.ok || result.status_code === 0;
+
+        if (isMapped) {
+            const checkboxMap = {
+                1: "selected_up",
+                2: "selected_down",
+                3: "selected_both"
+            };
+            const idname = checkboxMap[lineId];
+            const checkbox = document.querySelector(`.form-check-input[data-idname="${idname}"]`);
+            if (checkbox) checkbox.disabled = true;
+             //Enable map checkbox too
+            const roiCheckbox = document.querySelector(`.roi_map_check[data-idname="line_id_${lineId}"]`);
+            if (roiCheckbox) roiCheckbox.checked = true;
+
+
+
+            const clearBtn = document.querySelector(`#line_${lineId}_row button`);
+            if (clearBtn) clearBtn.disabled = true;
+        }
+
+        return isMapped;
+    } catch (err) {
+        console.error(`Error checking map status for line ${lineId}`, err);
+        return false;
+    }
+}
+
+function getFrame(cameraIp, projectId) {
+    const apiUrl = `/getframe/${encodeURIComponent(cameraIp)}/${encodeURIComponent(projectId)}`;
+
+    $('#section-block').block({
+        message: '<div class="d-flex justify-content-center"><p class="mb-0">Please wait...</p><div class="sk-wave m-0"><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div></div></div>',
+        css: { backgroundColor: 'transparent', color: '#fff', border: '0' },
+        overlayCSS: { opacity: 0.5 }
+    });
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", apiUrl, true);
+    xhr.onload = async function () {
+        $('#section-block').unblock();
+        if (xhr.status === 200) {
+            const responseData = JSON.parse(xhr.responseText);
+            const frameBase64 = responseData.data.frame_baseurl;
+            const lineDict = responseData.data.line_dictall;
+
+            const canvas = document.getElementById("draw_line");
+            const context = canvas.getContext("2d");
+
+            loadingIndicator.style.display = 'none';
+            camera_message_above.style.display = 'none';
+            roi_lines_show.style.display = 'block';
+            updateButton.style.display = 'block';
+            store_existing_linesdic.textContent = JSON.stringify(lineDict);
+
+            const img = new Image();
+            img.src = `data:image/jpeg;base64,${frameBase64}`;
+            img.onload = async function () {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(img, 0, 0);
+                canvas.style.display = 'block';
+
+                baseImage = img;
+                canvasContext = context;
+                canvasElement = canvas;
+
+                const checkboxMap = {
+                    1: "selected_up",
+                    2: "selected_down",
+                    3: "selected_both"
+                };
+
+                for (const [key, value] of Object.entries(lineDict)) {
+                    const lineId = key === "first" ? 1 : key === "second" ? 2 : key === "third" ? 3 : null;
+                    if (!lineId) continue;
+
+                    const topx = parseFloat(value[`topx_${lineId}`]);
+                    const topy = parseFloat(value[`topy_${lineId}`]);
+                    const bottomx = parseFloat(value[`bottomx_${lineId}`]);
+                    const bottomy = parseFloat(value[`bottomy_${lineId}`]);
+                    const direction = parseInt(value[`direction_${lineId}`]);
+
+                    if (isNaN(topx) || isNaN(topy) || isNaN(bottomx) || isNaN(bottomy)) continue;
+
+                    const p1 = { x: topx, y: topy };
+                    const p2 = { x: bottomx, y: bottomy };
+                    const labelText = direction === 1 ? "UP" : direction === 0 ? "DOWN" : "BOTH";
+
+                    storedLines[lineId] = { p1, p2, labelText };
+
+                    drawMainLineWithArrows(context, p1, p2, labelText, lineId);
+
+                    document.getElementById(`topx_${lineId}`).innerText = Math.round(p1.x);
+                    document.getElementById(`topy_${lineId}`).innerText = Math.round(p1.y);
+                    document.getElementById(`bottomx_${lineId}`).innerText = Math.round(p2.x);
+                    document.getElementById(`bottomy_${lineId}`).innerText = Math.round(p2.y);
+
+                    const idname = checkboxMap[lineId];
+                    console.log("**********kishoreeeeeeeeeeeeee",idname)
+                    const checkbox = document.querySelector(`.form-check-input[data-idname="${idname}"]`);
+                    if (checkbox) checkbox.checked = true;
+
+                    // 🔒 Check if the line is mapped and disable if needed
+                    await checkMappedAndDisable(lineId);
+                }
+            };
+
+            canvas.onclick = function (e) {
+                if (!isDrawingEnabled || selectedLineNumbers.length === 0) {
+                    alert("Please select at least one checkbox to draw.");
+                    return;
+                }
+
+                const activeLine = selectedLineNumbers.find(num => {
+                    const idname = checkboxMap[num];
+                    const checkbox = document.querySelector(`.form-check-input[data-idname="${idname}"]`);
+                    return !storedLines[num] && checkbox && checkbox.checked;
+                });
+
+                if (!activeLine) {
+                    alert("Please select a valid checkbox and draw the line.");
+                    return;
+                }
+
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                clickPoints.push({ x, y });
+                drawDot(x, y);
+                clickCount++;
+
+                if (clickCount === 2) {
+                    const [p1, p2] = clickPoints;
+                    const labelText = activeLine === 1 ? "UP" : activeLine === 2 ? "DOWN" : "BOTH";
+
+                    drawMainLineWithArrows(canvasContext, p1, p2, labelText, activeLine);
+
+                    storedLines[activeLine] = { p1, p2, labelText };
+
+                    document.getElementById(`topx_${activeLine}`).innerText = Math.round(p1.x);
+                    document.getElementById(`topy_${activeLine}`).innerText = Math.round(p1.y);
+                    document.getElementById(`bottomx_${activeLine}`).innerText = Math.round(p2.x);
+                    document.getElementById(`bottomy_${activeLine}`).innerText = Math.round(p2.y);
+
+                    clickPoints = [];
+                    clickCount = 0;
+
+                    if (selectedLineNumbers.every(num => storedLines[num])) {
+                        isDrawingEnabled = false;
+                    }
+                }
+            };
+
+            const drawDot = (x, y) => {
+                context.beginPath();
+                context.arc(x, y, 4, 0, 2 * Math.PI);
+                context.fillStyle = "black";
+                context.fill();
+            };
+
+        } else {
+            camera_message_above.innerText = "Failed to load frame.";
+        }
+    };
+
+    xhr.onerror = function () {
+        loadingIndicator.style.display = 'none';
+        $('#section-block').unblock();
+        camera_message_above.innerText = "Error loading frame.";
+    };
+
+    xhr.send();
+}
+
+
+function drawMainLineWithArrows(ctx, p1, p2, labelText, lineId) {
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    const midX = (p1.x + p2.x) / 2;
+    const midY = (p1.y + p2.y) / 2;
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const perpX = -dy / length;
+    const perpY = dx / length;
+    const arrowLength = 30;
+
+    const directions = {
+        1: ['UP'],
+        2: ['DOWN'],
+        3: ['UP', 'DOWN']
+    };
+
+    directions[lineId]?.forEach(direction => {
+        let endX, endY;
+        if (direction === 'UP') {
+            endX = midX - perpX * arrowLength;
+            endY = midY - perpY * arrowLength;
+        } else {
+            endX = midX + perpX * arrowLength;
+            endY = midY + perpY * arrowLength;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(midX, midY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        drawArrowhead(ctx, midX, midY, endX, endY);
+    });
+
+    ctx.fillStyle = "black";
+    ctx.font = "bold 14px Arial";
+    ctx.fillText(labelText, midX + 5, midY - 10);
+}
+
+async function clearLine(lineNumber) {
+    try {
+        const project_id = projectId;
+        const response = await fetch('/main/roi_unmap', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: project_id,
+                lineNumber: lineNumber,
+                camera_ip: cameraIp
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.status_code === 0) {
+            alert(result.message || "LINE IS MAPPED, UNMAP IT TO CLEAR");
+            return;
+        }
+    
+    
+        if (storedLines[lineNumber]) {
+            delete storedLines[lineNumber];
+
+            if (canvasContext && baseImage) {
+                canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                canvasContext.drawImage(baseImage, 0, 0);
+
+                Object.entries(storedLines).forEach(([lnum, data]) => {
+                    const { p1, p2, labelText } = data;
+
+                    canvasContext.beginPath();
+                    canvasContext.moveTo(p1.x, p1.y);
+                    canvasContext.lineTo(p2.x, p2.y);
+                    canvasContext.strokeStyle = "red";
+                    canvasContext.lineWidth = 2;
+                    canvasContext.stroke();
+
+                    const midX = (p1.x + p2.x) / 2;
+                    const midY = (p1.y + p2.y) / 2;
+
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const perpX = -dy / length;
+                    const perpY = dx / length;
+                    const arrowLength = 30;
+
+                    const directions = {
+                        1: ['UP'],
+                        2: ['DOWN'],
+                        3: ['UP', 'DOWN']
+                    };
+
+                    directions[lnum]?.forEach(direction => {
+                        let endX, endY;
+                        if (direction === 'UP') {
+                            endX = midX - perpX * arrowLength;
+                            endY = midY - perpY * arrowLength;
+                        } else {
+                            endX = midX + perpX * arrowLength;
+                            endY = midY + perpY * arrowLength;
+                        }
+
+                        canvasContext.beginPath();
+                        canvasContext.moveTo(midX, midY);
+                        canvasContext.lineTo(endX, endY);
+                        canvasContext.strokeStyle = "blue";
+                        canvasContext.lineWidth = 2;
+                        canvasContext.stroke();
+
+                        drawArrowhead(canvasContext, midX, midY, endX, endY);
+                    });
+
+                    canvasContext.fillStyle = "black";
+                    canvasContext.font = "bold 14px Arial";
+                    canvasContext.fillText(labelText, midX + 5, midY - 10);
+                });
+            }
+
+            document.getElementById(`topx_${lineNumber}`).innerText = "";
+            document.getElementById(`topy_${lineNumber}`).innerText = "";
+            document.getElementById(`bottomx_${lineNumber}`).innerText = "";
+            document.getElementById(`bottomy_${lineNumber}`).innerText = "";
+
+
+
+            const checkboxMap = {
+                1: "selected_up",
+                2: "selected_down",
+                3: "selected_both"
+            };
+            const idname = checkboxMap[lineNumber];
+            if (idname) {
+                const checkbox = document.querySelector(`.form-check-input[data-idname="${idname}"]`);
+                if (checkbox) checkbox.checked = false;
+            }
+            isDrawingEnabled = selectedLineNumbers.length > 0;
+            clickPoints = [];
+            clickCount = 0;
+
+        }
+    }catch (error) {
+        alert("Error clearing line: " + error.message);
+        console.error("Error in clearLine:", error);
+    }
+}
+
+async function submitForm() {
+    const project_select = projectId;
+    const camera = cameraIp;
+
+    console.log("project_select", project_select);
+    console.log("camera_select", camera);
+
+    // Remove existing modals if any
+    document.getElementById('confirmationModal')?.remove();
+    document.getElementById('successModal')?.remove();
+    document.getElementById('errorModal')?.remove();
+
+    // Show confirmation modal
+    const confirmationModal = `
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to update the points?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmUpdate">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', confirmationModal);
+    const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    modal.show();
+
+    document.getElementById('confirmUpdate').addEventListener('click', async () => {
+        modal.hide();
+
+
+
+
+        // collect map checked
+        const mapped_roi_checked = [];
+        let validationROIError = false;
+
+        document.querySelectorAll(".roi_map_check").forEach((checkbox) => {
+            if (checkbox.checked) {
+                const row = checkbox.closest("tr"); 
+                const selectBox = row.querySelector('input[type="checkbox"]:not(.roi_map_check)'); // first col checkbox
+
+                if (!selectBox.checked) {
+                    validationROIError = true;
+                } else {
+                    mapped_roi_checked.push(checkbox.dataset.idname);
+                }
+            }
+        });
+        if (validationROIError) {
+            const errorModal = `
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="errorModalLabel">Line selection Error:</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Please check that the row is selected for the line you want to draw/map.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', errorModal);
+            const errorModalInstance = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModalInstance.show();
+            return; // stop submission
+        }
+
+
+        const idValuePairs = {};
+
+        for (const lineId in storedLines) {
+            const line = storedLines[lineId];
+
+            idValuePairs[lineId] = {
+                line_id: parseInt(lineId),
+                [`topx_${lineId}`]: Math.round(line.p1.x),
+                [`topy_${lineId}`]: Math.round(line.p1.y),
+                [`bottomx_${lineId}`]: Math.round(line.p2.x),
+                [`bottomy_${lineId}`]: Math.round(line.p2.y),
+                [`direction_${lineId}`]: 
+                    line.labelText === "UP" ? 1 :
+                    line.labelText === "DOWN" ? 0 :
+                    line.labelText === "BOTH" ? 2 : null
+            };
+        }
+
+
+        
+
+
+        const apiUrl = `/update_roi/${encodeURIComponent(camera)}`;
+        const request = {
+            idValuePairs,
+            project_id: project_select,
+            mapped_roi_checked:mapped_roi_checked,
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(request)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                const errorMessage = errorData.detail || "Unknown error occurred.";
+
+                const errorModal = `
+                    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ${errorMessage}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', errorModal);
+                const errorModalInstance = new bootstrap.Modal(document.getElementById('errorModal'));
+                errorModalInstance.show();
+                return;
+            }
+
+            const responseData = await response.json();
+            console.log("Response from update API:", responseData);
+
+            if (responseData.status_code === 1) {
+                const successModal = `
+                    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="successModalLabel">Success</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Points successfully updated!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', successModal);
+                const success = new bootstrap.Modal(document.getElementById('successModal'));
+                success.show();
+                setTimeout(() => {
+                    window.location.href = "/main/detection";
+                }, 1000);
+            } else {
+                throw new Error(responseData.message || "Update failed.");
+            }
+
+        } catch (error) {
+            const errorModal = `
+                <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${error.message}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', errorModal);
+            const errorModalInstance = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModalInstance.show();
+        }
+
+        // Cleanup confirmation modal
+        document.getElementById('confirmationModal')?.remove();
+    });
+}
+
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.detection_status === true) {
+            Toastify({
+                text: data.latest_status.message || "drawline Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+</script>
+
+
+
+  <!-- <script>
+    
+    const dropdown = document.querySelector("#dropdown-icon-demo");
+    const selected = dropdown.querySelector(".selected");
+    const dropdownToggle = dropdown.querySelector(".dropdown-toggle");
+    const dropdownMenu = dropdown.querySelector(".dropdown-menu");
+    const dropdownItems = dropdownMenu.querySelectorAll(".dropdown-item");
+    
+   
+ 
+    
+    const updateButton = document.getElementById('update_button');
+    const project_select = document.getElementById("pro-select");
+    const point_info = document.getElementById('point_info');
+    const camera_message_above = document.getElementById('camera_message_above');
+    
+    
+
+    const store_existing_linesdic = document.getElementById('store_existing_linesdic');
+    
+    const roi_lines_show = document.getElementById('roi_lines_show');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    
+    // Hide the update button initially
+    roi_lines_show.style.display = 'none';
+    updateButton.style.display = 'none';
+    document.getElementById("previous_button").style.display = "block";
+
+    point_info.style.display = 'none';
+ 
+    store_existing_linesdic.style.display = 'none';
+    
+    //edit line purpose
+    let clearedLineIDs = [];
+    
+    const MAX_LINES = 3; // Maximum number of lines allowed
+    
+    const global_line_length= 0;
+    
+    let Submission_existing_direction = [];
+    
+    function countExistingLines() {
+      
+        const existingLines = JSON.parse(store_existing_linesdic.textContent);
+        // console.log("store line:",existingLines)
+      
+        return Object.keys(existingLines[0]).filter(key => key.includes('_line')).length;
+    }
+    
+    const detectionStatus = JSON.parse('{{ detection_status | tojson | safe }}');
+
+    var projectId = "{{ project_id }}";
+    var cameraIp = "{{ camera_ip }}";
+    console.log("#$$$:",projectId)
+    console.log("%%%:",cameraIp)
+    getframe(cameraIp,projectId)
+
+async function getframe(cameraIp,projectId){
+          
+console.log("getframe:",cameraIp,projectId)
+                const apiUrl = `/getframe/${encodeURIComponent(cameraIp)}/${encodeURIComponent(projectId)}`;
+                // console.log("apiUrl", apiUrl);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", apiUrl, true);
+                xhr.onload = function () {
+                $('#section-block').block({
+                    message: '<div class="d-flex justify-content-center"><p class="mb-0">Please wait...</p><div class="sk-wave m-0"><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div><div class="sk-rect sk-wave-rect"></div></div></div>',
+                    css: { backgroundColor: 'transparent', color: '#fff', border: '0' },
+                    overlayCSS: { opacity: 0.5 }
+                });
+                    if (xhr.status === 200) {
+                    loadingIndicator.style.display = 'none'; // Hide loading indicator
+                    camera_message_above.style.display = 'none';
+                    roi_lines_show.style.display = 'block';
+                    updateButton.style.display = 'block';
+                    const responseData = JSON.parse(xhr.responseText);
+                    // console.log("Response Data:", responseData);
+                    current_camera_detection_details = responseData.data.current_camera_detection_details
+                    const cameraLiveStatus = responseData.data.camera_live_status;
+                    const line_length = responseData.data.line_length;
+
+                    console.log("Response Line lenght ",line_length)
+                    // console.log("Response current_camera_detection_details",current_camera_detection_details)
+
+                    current_camera_detection_details.forEach(detail => {
+                      current_camera_detection_active_status = detail.detection_active_status
+                      current_camera_detection_active_lineids = detail.mapping_lineids
+                    });
+                    // console.log("current_camera_detection_active_status:", current_camera_detection_active_status);
+                    
+                    if (Array.isArray(line_length) && line_length.length === 1 && line_length[0] === 3) {
+                      
+                      [1, 2, 3].forEach(lineNumber => {
+                          clearLine(lineNumber);
+                      });
+                  } else if (Array.isArray(line_length)) {
+                     
+                      line_length.forEach(line_value => {
+                          if (!clearedLineIDs.includes(line_value)) {
+                              clearedLineIDs.push(line_value);
+                          }
+                      });
+                  }
+
+
+     
+                  clearedLineIDs = clearedLineIDs.filter(id => line_length.includes(id));
+
+                  console.log("Final clearedLineIDs:", clearedLineIDs, "line_length:", line_length);
+
+
+              
+
+                    // console.log("clearedLineIDs",clearedLineIDs,line_length)
+                    var global_line_length = line_length
+                    console.log("global:",global_line_length)
+                    // console.log("cameraLiveStatus",cameraLiveStatus)
+                    if (!cameraLiveStatus) {
+                        document.querySelector('.loading_section').style.display = 'none';
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Camera Not Live',
+                            text: 'The camera is not live. Cannot Draw ROI.',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload(); 
+                        });
+                        return;
+                    }
+    
+                  
+                    
+                    const frameBase64 = responseData.data.frame_baseurl;
+                    const imageElement = document.createElement('img');
+                    imageElement.src = `data:image/jpeg;base64,${frameBase64}`;
+                    
+                    const linedictall = responseData.data.line_dictall;
+                    // console.log("line_dictall######:",linedictall)
+
+                    const linesJsonString = JSON.stringify(linedictall);
+                    
+                    store_existing_linesdic.textContent = linesJsonString;
+    
+                    // console.log("existing line", linedictall);
+                    console.log("Ssssssssssss",store_existing_linesdic)
+                    const canvas = document.querySelector("canvas");
+                    canvas.style.display = 'block';
+                    const context = canvas.getContext("2d");
+
+                    if (linedictall === null)
+                    {
+                      // console.log("linedictall value is none / null ")
+                      const rawImg = new Image();
+                      const newImage = src => {
+                          rawImg.src = src;
+                          rawImg.onload = () => {
+                          canvas.style.backgroundImage = `url(${src})`;
+                          canvas.height = rawImg.height;
+                          canvas.width = rawImg.width;
+                          context.drawImage(rawImg, 0, 0);
+                        }
+                      }
+                      // console.log("*******")
+                      const frameContainer = document.getElementById('section-block');
+                      frameContainer.innerHTML = '';               
+                      frameContainer.appendChild(newImage(`data:image/jpeg;base64,${frameBase64}`));
+                    }
+                  
+                   function setInnerText(id, value) {
+                    document.getElementById(id).innerText = (value === null || value === undefined || value === '') ? 'null' : value;
+                }
+                // console.log("$$$$$$$$$$$")
+
+                const keys = ['topx', 'topy', 'bottomx', 'bottomy'];
+
+                ['first', 'second', 'third'].forEach((position, index) => {
+                    keys.forEach(key => {
+                        const elementId = `${key}_${index + 1}`;
+                  
+                        const value = linedictall[position] ? linedictall[position][elementId] : null;
+                        setInnerText(elementId, value);
+                    });
+                });
+
+                // Add checks before setting direction values
+
+                console.log("direction:",document.getElementById('direction_1').value)
+                // document.getElementById('direction_1').value = linedictall.first ? linedictall.first.direction_1 : '';
+                // document.getElementById('direction_2').value = linedictall.second ? linedictall.second.direction_2 : '';
+                // document.getElementById('direction_3').value = linedictall.third ? linedictall.third.direction_3 : '';
+              
+
+                    const infoPoints = document.querySelector(".points-info");
+    
+                    const clickPoints = [];
+                    let clickCount = 0;
+                    
+                    // Function to count the existing lines
+                    const countExistingLines = () => {
+                        let lineCount = 0;
+                        for (let i = 1; i <= line_length; i++) {
+                            const tableRow = document.querySelector(`#line_${i}_row`);
+                            if (tableRow && tableRow.querySelectorAll('td span.text-success p').length > 0) {
+                                lineCount++;
+                            }
+                            console.log("remaining line count:",lineCount);
+                        }
+                        return lineCount;
+                    };
+    
+                    // Function to check if more lines can be drawn
+                    const canDrawMoreLines = () => {
+                      // console.log("#######candrawmorelines")
+                        const existingLineCount = countExistingLines();
+                        // console.log("existingLineCount",existingLineCount)
+                    } //no use this code
+
+                   
+   
+                    function updateClearedRow(clearedLineID, topX, topY, bottomX, bottomY) {
+                      // console.log("clear_line id:",clearedLineID)
+                      const tableRow = document.querySelector(`#line_${clearedLineID}_row`);
+                      if (tableRow) {
+                          const tdElements = tableRow.querySelectorAll('td');
+                          tdElements.forEach(td => {
+                              const span = td.querySelector('span.text-success');
+                              if (span) {
+                                  const pElements = span.querySelectorAll('p');
+                                  pElements.forEach((p, index) => {
+
+                                    document.getElementById(`topx_${lineNumber}`).textContent= topX.toString();
+                                    document.getElementById(`topy_${lineNumber}`).textContent= topY.toString();
+                                    document.getElementById(`bottomx_${lineNumber}`).textContent= bottomX.toString();
+                                    document.getElementById(`bottomy_${lineNumber}`).textContent= bottomY.toString();
+                                    
+                                  });
+                              }
+                          });
+                      }
+                  }
+
+                  
+                    
+                  canvas.addEventListener("click" , evt =>{
+                      if (clearedLineIDs.length !== 0)
+                      {
+                        console.log("0000 global_line_length",global_line_length)
+                        console.log("line_length:",line_length)
+                        console.log(" 000 clickCount2",clickCount)
+                        console.log("clearid in single line",clearedLineIDs)
+                 
+                          if (clearedLineIDs.length == 1){
+                            console.log("example:",MAX_LINES,clickCount,line_length)
+                            console.log("0000 global_line_length",global_line_length)
+                            console.log("line_length:",line_length)
+                            console.log(" 000 clickCount2",clickCount)
+                            console.log("clearid in single line",clearedLineIDs)
+                           
+                            // if (global_line_length =="3"){
+                            //   console.log("$$$#$#$% No cleard line and already exist 3 lines")
+                            //   return;
+                            // }
+                                 
+                              console.log("Single Line legnth for clear/update",clearedLineIDs)
+                              clickPoints.push([evt.offsetX, evt.offsetY]);
+                              drawDot(evt.offsetX, evt.offsetY);
+                              infoPoints.textContent = clickPoints.join(" : ");
+                              clickCount++;
+                              if (clickCount % 2 === 0) {
+                                      const lineIndex = clickCount / 2 - 1;
+                                      console.log("single clear line ids 0:",clearedLineIDs[0]);
+                                      single_drawLine(clickPoints[lineIndex * 2], clickPoints[lineIndex * 2 + 1], clearedLineIDs[0]);                            
+                                      const [topX, topY] = clickPoints[lineIndex * 2];
+                                      const [bottomX, bottomY] = clickPoints[lineIndex * 2 + 1];
+                                      updateClearedRow(clearedLineIDs, topX, topY, bottomX, bottomY); 
+
+                                      return;
+                                }
+                          }
+                          else{
+                            // if (clickCount >= MAX_LINES * 2) {
+                            //   console.log("No cleard line and already exist 3 lines")
+                            //   return;
+                            // }
+                          
+                  
+                            console.log("Multi Line legnth for clear/upate ",clearedLineIDs)
+                              clickPoints.push([evt.offsetX, evt.offsetY]);
+                              drawDot(evt.offsetX, evt.offsetY);
+                              infoPoints.textContent = clickPoints.join(" : ");
+                              clickCount++;
+                              if (clickCount % 2 === 0) {
+                                      const lineIndex = clickCount / 2 - 1;
+                                      console.log("multiple clear line ids 0:",clearedLineIDs[0]);
+                                      drawLine(clickPoints[lineIndex * 2], clickPoints[lineIndex * 2 + 1], clearedLineIDs[0]);                            
+                                      const [topX, topY] = clickPoints[lineIndex * 2];
+                                      const [bottomX, bottomY] = clickPoints[lineIndex * 2 + 1];
+                                      updateClearedRow(clearedLineIDs, topX, topY, bottomX, bottomY); 
+                                }
+                          }
+                      }
+                      else {
+        
+        // if (clickPoints.length >= 6) {
+        //     console.log("Maximum of 3 lines reached. No more points can be added.");
+        //     return;
+        // }
+
+        // console.log("Multi Line length for clear/update", clearedLineIDs);
+        // clickPoints.push([evt.offsetX, evt.offsetY]);
+        // drawDot(evt.offsetX, evt.offsetY);
+        // infoPoints.textContent = clickPoints.join(" : ");
+        // clickCount++;
+
+        // if (clickCount % 2 === 0) {
+        //     const lineIndex = clickCount / 2 - 1;
+        //     console.log("multiple clear line ids 0:", clearedLineIDs[0]);
+        //     drawLine(clickPoints[lineIndex * 2], clickPoints[lineIndex * 2 + 1], clearedLineIDs[0]);
+        //     const [topX, topY] = clickPoints[lineIndex * 2];
+        //     const [bottomX, bottomY] = clickPoints[lineIndex * 2 + 1];
+        //     updateClearedRow(clearedLineIDs, topX, topY, bottomX, bottomY);
+        // }
+    }
+});
+
+                  
+                 
+                    function updateTableRow(lineNumber, topX, topY, bottomX, bottomY) {
+                      // console.log("hi1")
+                      
+                      const tableRow = document.querySelector(`#line_${lineNumber}_row`);
+                      if (tableRow) {
+                          const tdElements = tableRow.querySelectorAll('td');
+                          tdElements.forEach(td => {
+                              const span = td.querySelector('span.text-success');
+                              if (span) {
+                                  const pElements = span.querySelectorAll('p');
+                                  pElements.forEach((p, index) => {                         
+                                    document.getElementById(`topx_${lineNumber}`).textContent= topX.toString();
+                                    document.getElementById(`topy_${lineNumber}`).textContent= topY.toString();
+                                    document.getElementById(`bottomx_${lineNumber}`).textContent= bottomX.toString();
+                                    document.getElementById(`bottomy_${lineNumber}`).textContent= bottomY.toString();
+                                      
+                                  });
+                              }
+                          });
+                      }
+                  }
+
+
+
+
+              //     const drawArrowhead = (context, midX, midY) => {
+              //     const headlen = 10;
+              //     const arrowHeight = 20;
+
+              //     context.beginPath();
+                  
+              //     context.moveTo(midX, midY);
+              //     context.lineTo(midX, midY - arrowHeight);
+                  
+              
+              //     context.lineTo(midX - headlen, midY - arrowHeight + headlen);
+                  
+                
+              //     context.moveTo(midX, midY - arrowHeight);
+                  
+              
+              //     context.lineTo(midX + headlen, midY - arrowHeight + headlen);
+                  
+                
+              //     context.closePath();
+              //     context.stroke();
+              // };
+
+
+
+
+    const drawArrowhead = (context, x, y, angle) => {
+    const headlen = 10; 
+
+    const x1 = x - headlen * Math.cos(angle - Math.PI / 6);
+    const y1 = y - headlen * Math.sin(angle - Math.PI / 6);
+    const x2 = x - headlen * Math.cos(angle + Math.PI / 6);
+    const y2 = y - headlen * Math.sin(angle + Math.PI / 6);
+
+    context.beginPath();
+    context.moveTo(x, y);
+    context.lineTo(x1, y1);
+    context.moveTo(x, y);
+    context.lineTo(x2, y2);
+    context.strokeStyle = 'red';
+    context.lineWidth = 2;
+    context.stroke();
+};
+
+const single_drawLine = (startPoint, endPoint, lineNumber) => {
+    // Draw the main line
+    context.beginPath();
+    context.moveTo(startPoint[0], startPoint[1]);
+    context.lineTo(endPoint[0], endPoint[1]);
+    context.strokeStyle = 'red';
+    context.lineWidth = 2;
+    context.stroke();
+
+    // Calculate the midpoint of the line
+    const midPoint = [(startPoint[0] + endPoint[0]) / 2, (startPoint[1] + endPoint[1]) / 2];
+
+    // Perpendicular line direction (90 degrees from original line)
+    const dx = endPoint[0] - startPoint[0];
+    const dy = endPoint[1] - startPoint[1];
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const unitDx = dx / length;
+    const unitDy = dy / length;
+
+    // Find the perpendicular direction
+    const perpDx = -unitDy;
+    const perpDy = unitDx;
+
+    // Define the end points of the perpendicular line
+    const perpLength = 30; // Perpendicular length
+    const perpEndX = midPoint[0] + perpDx * perpLength;
+    const perpEndY = midPoint[1] + perpDy * perpLength;
+    const perpStartX = midPoint[0] - perpDx * perpLength;
+    const perpStartY = midPoint[1] - perpDy * perpLength;
+    console.log("arrow coordinates")
+
+
+    // Draw the perpendicular line and arrowheads based on lineNumber
+    if (lineNumber === 1 || lineNumber === 2 || lineNumber === 3) {
+        context.beginPath();
+        if (lineNumber === 1) {
+            context.moveTo(midPoint[0], midPoint[1]);
+            context.lineTo(perpStartX, perpStartY);
+        } else if (lineNumber === 2) {
+            context.moveTo(midPoint[0], midPoint[1]);
+            context.lineTo(perpEndX, perpEndY);
+        } else if (lineNumber === 3) {
+            context.moveTo(perpStartX, perpStartY);
+            context.lineTo(perpEndX, perpEndY);
+        }
+        context.strokeStyle = 'red'; // Perpendicular line color
+        context.lineWidth = 2;
+        context.stroke();
+        
+
+        // Draw arrowheads based on lineNumber (adjust the angle)
+        if (lineNumber === 1) {
+            // If lineNumber is 1 (UP), the arrowhead should point upwards
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+        } else if (lineNumber === 2) {
+            // If lineNumber is 2 (DOWN), the arrowhead should point downwards
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        } else if (lineNumber === 3) {
+            // If lineNumber is 3 (BOTH), draw two arrowheads
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        }
+    }
+
+    // Add text label based on the line number
+    context.font = "16px Arial";
+    context.fillStyle = "black";
+    if (lineNumber === 1) {
+        context.fillText(`Line ${lineNumber}, UP`, midPoint[0] + 5, midPoint[1] - 30); 
+    } else if (lineNumber === 2) {
+        context.fillText(`Line ${lineNumber}, DOWN`, midPoint[0] + 5, midPoint[1] + 20); 
+    } else {
+        context.fillText(`Line ${lineNumber}, BOTH`, midPoint[0] + 5, midPoint[1] - 5);
+    }
+
+    console.log(`Line ${lineNumber}: Start (${startPoint[0]}, ${startPoint[1]}), End (${endPoint[0]}, ${endPoint[1]})`);
+    updateTableRow(lineNumber, startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
+    clearedLineIDs.shift();
+};
+                      
+              const drawLine = (startPoint, endPoint, lineNumber) => {
+              console.log("line number in multidrawline:", lineNumber);
+              console.log("START POINT:", startPoint);
+              console.log("end point:", endPoint);
+
+
+              context.beginPath();
+              context.moveTo(startPoint[0], startPoint[1]);
+              context.lineTo(endPoint[0], endPoint[1]);
+              context.strokeStyle = 'red'; // Set line color to red
+              context.lineWidth = 2;
+              context.stroke();
+
+              const midPoint = [(startPoint[0] + endPoint[0]) / 2, (startPoint[1] + endPoint[1]) / 2];
+              const dx = endPoint[0] - startPoint[0];
+              const dy = endPoint[1] - startPoint[1];
+              const length = Math.sqrt(dx * dx + dy * dy);
+              const unitDx = dx / length;
+              const unitDy = dy / length;
+
+              // Find the perpendicular direction
+              const perpDx = -unitDy;
+              const perpDy = unitDx;
+
+              // Define the end points of the perpendicular line
+              const perpLength = 30; // Perpendicular length
+              const perpEndX = midPoint[0] + perpDx * perpLength;
+              const perpEndY = midPoint[1] + perpDy * perpLength;
+              const perpStartX = midPoint[0] - perpDx * perpLength;
+              const perpStartY = midPoint[1] - perpDy * perpLength;
+              if (lineNumber === 1 || lineNumber === 2 || lineNumber === 3) {
+        context.beginPath();
+        if (lineNumber === 1) {
+            context.moveTo(midPoint[0], midPoint[1]);
+            context.lineTo(perpStartX, perpStartY);
+        } else if (lineNumber === 2) {
+            context.moveTo(midPoint[0], midPoint[1]);
+            context.lineTo(perpEndX, perpEndY);
+        } else if (lineNumber === 3) {
+            context.moveTo(perpStartX, perpStartY);
+            context.lineTo(perpEndX, perpEndY);
+        }
+        context.strokeStyle = 'red'; // Perpendicular line color
+        context.lineWidth = 2;
+        context.stroke();
+
+        // Draw arrowheads based on lineNumber
+        if (lineNumber === 1) {
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+        } else if (lineNumber === 2) {
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        } else if (lineNumber === 3) {
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        }
+    }
+
+    // Add text label based on the line number
+    context.font = "16px Arial";
+    context.fillStyle = "black";
+    if (lineNumber === 1) {
+        context.fillText(`Line ${lineNumber}, UP`, midPoint[0] + 5, midPoint[1] - 30); 
+    } else if (lineNumber === 2) {
+        context.fillText(`Line ${lineNumber}, DOWN`, midPoint[0] + 5, midPoint[1] + 20); 
+    } else {
+        context.fillText(`Line ${lineNumber}, BOTH`, midPoint[0] + 5, midPoint[1] - 5);
+    }
+
+    console.log(`Line ${lineNumber}: Start (${startPoint[0]}, ${startPoint[1]}), End (${endPoint[0]}, ${endPoint[1]})`);
+    updateTableRow(lineNumber, startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
+    clearedLineIDs.shift();
+};
+
+    
+                    // Draw a dot at a specific point
+                    const drawDot = (x, y) => {
+                      context.beginPath();
+                      context.arc(x, y, 4, 0, 2 * Math.PI);
+                      context.fill();
+                    };
+                    
+    
+                    // Load a new image and draw existing lines
+                    const rawImg = new Image();
+                    const newImage = src => {
+                      rawImg.src = src;
+                      rawImg.onload = () => {
+                        canvas.style.backgroundImage = `url(${src})`;
+                        canvas.height = rawImg.height;
+                        canvas.width = rawImg.width;
+                        context.drawImage(rawImg, 0, 0);
+                        // console.log("Image loaded")
+                                        // Extract values from HTML elements
+                          const topx_1 = parseFloat(document.getElementById('topx_1').textContent);
+                          const topy_1 = parseFloat(document.getElementById('topy_1').textContent);
+                          const bottomx_1 = parseFloat(document.getElementById('bottomx_1').textContent);
+                          const bottomy_1 = parseFloat(document.getElementById('bottomy_1').textContent);
+
+                          const topx_2 = parseFloat(document.getElementById('topx_2').textContent);
+                          const topy_2 = parseFloat(document.getElementById('topy_2').textContent);
+                          const bottomx_2 = parseFloat(document.getElementById('bottomx_2').textContent);
+                          const bottomy_2 = parseFloat(document.getElementById('bottomy_2').textContent);
+
+                          const topx_3 = parseFloat(document.getElementById('topx_3').textContent);
+                          const topy_3 = parseFloat(document.getElementById('topy_3').textContent);
+                          const bottomx_3 = parseFloat(document.getElementById('bottomx_3').textContent);
+                          const bottomy_3 = parseFloat(document.getElementById('bottomy_3').textContent);
+
+          
+                         
+
+                      const existingLines = [
+                          { start: [topx_1, topy_1], end: [bottomx_1, bottomy_1], color: 'red', label: 'Line 1' },
+                          { start: [topx_2, topy_2], end: [bottomx_2, bottomy_2], color: 'red', label: 'Line 2' },
+                          { start: [topx_3, topy_3], end: [bottomx_3, bottomy_3], color: 'red', label: 'Line 3' }
+                      ];
+
+                      existingLines.forEach((line, index) => {
+                          console.log("existing line draw:", line);
+
+                          // Draw the main line
+                          context.beginPath();
+                          context.moveTo(line.start[0], line.start[1]);
+                          context.lineTo(line.end[0], line.end[1]);
+                          context.strokeStyle = line.color;
+                          context.lineWidth = 2;
+                          context.stroke();
+
+                          // Calculate the midpoint of the line
+                          const midPoint = [(line.start[0] + line.end[0]) / 2, (line.start[1] + line.end[1]) / 2];
+
+                          // Calculate dx, dy, and length of the line
+                          const dx = line.end[0] - line.start[0];
+                          const dy = line.end[1] - line.start[1];
+                          const length = Math.sqrt(dx * dx + dy * dy);
+                          const unitDx = dx / length;
+                          const unitDy = dy / length;
+
+                          // Find the perpendicular direction
+                          const perpDx = -unitDy;
+                          const perpDy = unitDx;
+
+                          // Define the end points of the perpendicular line
+                          const perpLength = 30; // Perpendicular length
+                          const perpEndX = midPoint[0] + perpDx * perpLength;
+                          const perpEndY = midPoint[1] + perpDy * perpLength;
+                          const perpStartX = midPoint[0] - perpDx * perpLength;
+                          const perpStartY = midPoint[1] - perpDy * perpLength;
+                          if (line.label === 'Line 1' || line.label === 'Line 2' || line.label === 'Line 3') {
+                              context.beginPath();
+                              if (line.label === 'Line 1') {
+                                  context.moveTo(midPoint[0], midPoint[1]);
+                                  context.lineTo(perpStartX, perpStartY);
+                              } else if (line.label === 'Line 2') {
+                                  context.moveTo(midPoint[0], midPoint[1]);
+                                  context.lineTo(perpEndX, perpEndY);
+                              } else if (line.label === 'Line 3') {
+                                  context.moveTo(perpStartX, perpStartY);
+                                  context.lineTo(perpEndX, perpEndY);
+                              }
+                              context.strokeStyle = 'red'; // Perpendicular line color
+                              context.lineWidth = 2;
+                              context.stroke();
+                              if (line.label === 'Line 1') {
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+        } else if (line.label === 'Line 2') {
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        } else if (line.label === 'Line 3') {
+            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+        }
+    }
+
+
+                          context.font = "16px Arial";
+                          context.fillStyle = "black";
+
+                          // Draw arrowhead and label based on the line label
+                          if (line.label === 'Line 1') {
+                              drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+                              context.fillText(`${line.label}, UP`, midPoint[0] + 5, midPoint[1] - 30);
+                              context.lineTo(perpEndX, perpEndY);
+                          } else if (line.label === 'Line 2') {
+                            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+                              context.fillText(`${line.label}, DOWN`, midPoint[0] + 5, midPoint[1] + 20);
+                              context.lineTo(perpEndX, perpEndY);
+                          } else {
+                            drawArrowhead(context, perpStartX, perpStartY, Math.atan2(-perpDy, -perpDx));
+                            drawArrowhead(context, perpEndX, perpEndY, Math.atan2(perpDy, perpDx));
+                              context.fillText(`${line.label}, BOTH`, midPoint[0] + 5, midPoint[1] - 5);
+                              context.lineTo(perpEndX, perpEndY);
+                          }
+
+                          console.log(`Line ${index + 1}: Start (${line.start[0]}, ${line.start[1]}), End (${line.end[0]}, ${line.end[1]})`);
+                      });
+
+
+                      };
+                    };
+    
+    
+                    const frameContainer = document.getElementById('section-block');
+                    frameContainer.innerHTML = '';               
+                    frameContainer.appendChild(newImage(`data:image/jpeg;base64,${frameBase64}`));
+    
+                    
+                } else {
+                    document.querySelector('.loading_section').style.display = 'none';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Camera Not Live',
+                        text: 'The camera is not live. Cannot Draw ROI.',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/main/draw_line/';
+                        }
+                    });
+                }
+            }
+            xhr.onerror = function () {
+                loadingIndicator.style.display = 'none'; 
+                console.error('Request failed');
+            };
+                        
+              
+                xhr.send();
+
+             
+        
+           } 
+         
+
+    async function clearLine(lineNumber) {
+    const canvas = document.querySelector("canvas");
+    const context = canvas.getContext("2d");
+
+    const project_id = projectId
+    console.log("camerra ip in clearline:",cameraIp)
+    console.log("selected camerra ip in clearline:")
+    
+
+
+    try {
+        const response = await fetch('/main/roi_unmap', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                project_id: project_id,
+                lineNumber: lineNumber,
+                camera_ip:cameraIp
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alertHandler("LINE IS MAPPED, UNMAP IT TO CLEAR");
+            // throw new Error(errorData.message || "Failed to check the line");
+        }
+
+        const result = await response.json();
+        console.log(result.message);
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        redrawAllLinesExcept(lineNumber);
+
+        if (!clearedLineIDs.includes(lineNumber)) {
+            console.log("Clearing specific line:", clearedLineIDs);
+            clearedLineIDs.push(lineNumber);
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+        // alertHandler('Failed to clear the line: ' + error.message);
+    }
+}
+
+function previous_back(){
+  window.location.href = '/main/draw_line/';
+
+}
+    
+
+function redrawAllLinesExcept(exceptLineNumber) {
+    const canvas = document.querySelector("canvas");
+    const context = canvas.getContext("2d");
+
+
+    const lineColor = "red";
+    context.strokeStyle = lineColor;
+    const drawArrowhead = (context, midX, midY, direction) => {
+    const headlen = 10;
+    const arrowHeight = 20;
+
+    context.beginPath();
+
+    if (direction === 'up') {
+    
+        context.moveTo(midX, midY);
+        context.lineTo(midX, midY - arrowHeight);
+        context.lineTo(midX - headlen, midY - arrowHeight + headlen); 
+        context.moveTo(midX, midY - arrowHeight); 
+        context.lineTo(midX + headlen, midY - arrowHeight + headlen); 
+    } else if (direction === 'down') {
+     
+        context.moveTo(midX, midY);
+        context.lineTo(midX, midY + arrowHeight);
+        context.lineTo(midX - headlen, midY + arrowHeight - headlen); 
+        context.moveTo(midX, midY + arrowHeight); 
+        context.lineTo(midX + headlen, midY + arrowHeight - headlen); 
+    } else if (direction === 'both') {
+        
+        context.moveTo(midX, midY);
+        context.lineTo(midX, midY - arrowHeight);
+
+    
+        context.moveTo(midX, midY);
+        context.lineTo(midX, midY + arrowHeight);
+
+        
+        context.moveTo(midX, midY - arrowHeight);
+        context.lineTo(midX - headlen, midY - arrowHeight + headlen); 
+        context.moveTo(midX, midY - arrowHeight);
+        context.lineTo(midX + headlen, midY - arrowHeight + headlen); 
+
+        context.moveTo(midX, midY + arrowHeight);
+        context.lineTo(midX - headlen, midY + arrowHeight - headlen); 
+        context.moveTo(midX, midY + arrowHeight);
+        context.lineTo(midX + headlen, midY + arrowHeight - headlen); 
+    }
+
+    context.closePath();
+    context.stroke();
+};
+
+
+
+    const totalLines = 3;
+    for (let i = 1; i <= totalLines; i++) {
+        if (i !== exceptLineNumber) {
+            const tableRow = document.querySelector(`#line_${i}_row`);
+            if (tableRow) {
+              
+                const numericValues = Array.from(tableRow.querySelectorAll('td span.text-success p')).map(p => parseInt(p.textContent));
+
+       
+                context.lineWidth = 2;
+                context.beginPath();
+                context.moveTo(numericValues[0], numericValues[1]); // Move to the first point
+
+                for (let j = 2; j < numericValues.length; j += 2) {
+                    context.lineTo(numericValues[j], numericValues[j + 1]);
+                }
+
+                context.stroke();
+                context.closePath();
+
+          
+                const midPoint = [(numericValues[0] + numericValues[numericValues.length - 2]) / 2, 
+                                 (numericValues[1] + numericValues[numericValues.length - 1]) / 2];
+
+                if (i === 1) {
+                    drawArrowhead(context, midPoint[0], midPoint[1], 'up');
+                    context.fillText(`Line ${i},UP`,numericValues[0], numericValues[1] - 10); 
+                } else if (i === 2) {
+                    drawArrowhead(context, midPoint[0], midPoint[1], 'down');
+                    context.fillText(`Line ${i},DOWN`,numericValues[0], numericValues[1] - 10); 
+                } else if (i === 3) {
+                    drawArrowhead(context, midPoint[0], midPoint[1], 'both'); 
+                    context.fillText(`Line ${i},BOTH`,numericValues[0], numericValues[1] - 10); 
+                  }
+
+                // Append label (always black)
+                const label = `Line ${i}`;
+                context.fillStyle = "black";
+                // context.fillText(label, numericValues[0], numericValues[1] - 10); 
+        }}
+    }
+
+
+    updateTableRowData(exceptLineNumber);
+}
+
+
+    
+    function updateTableRowData(lineNumber) {
+        const tableRow = document.querySelector(`#line_${lineNumber}_row`);
+        if (tableRow) {
+            // Select only the <p> elements inside <span class="text-success"> within <td> elements
+            const pElements = tableRow.querySelectorAll('td span.text-success p');
+            pElements.forEach(p => {
+                // Set the text content of each <p> element to 'null'
+                p.textContent = 'null';
+            });
+        }
+    }
+  
+    
+  
+    async function submitForm() {
+      const project_select=projectId
+      // console.log("%$%@#$%3")
+      const camera=cameraIp
+      if(!project_select || !camera ){
+        alertHandler('Please select project and camera', false);
+        return;
+      }
+
+
+        
+        // Create a custom confirm dialog
+        const confirmationModal = `
+            <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to update the points?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmUpdate">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+       
+    
+        // Append the confirmation modal to the document body
+        document.body.insertAdjacentHTML('beforeend', confirmationModal);
+    
+        // Show the confirmation modal using Bootstrap's modal
+        const modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        modal.show();
+    
+        // Add click event listener to the Confirm button
+        document.getElementById('confirmUpdate').addEventListener('click', async () => {
+          
+         const idValuePairs = {};
+        
+         const rows = document.querySelectorAll('tr');
+            let sectionName = '';
+            let lineIdCounter = 1; // Initialize line_id counter
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+
+                cells.forEach(cell => {
+                    
+                    const pTags = cell.querySelectorAll('p');
+                    const selectTags = cell.querySelectorAll('input');
+
+                    pTags.forEach(p => {
+                        const textContent = p.textContent.trim();
+
+                        // Detect section names like "First", "Second", etc.
+                        const sectionMatch = textContent.match(/^(First|Second|Third)$/);
+                        if (sectionMatch) {
+                            sectionName = sectionMatch[1].toLowerCase(); // Convert section name to lowercase
+                            idValuePairs[sectionName] = {
+                                line_id: lineIdCounter // Set line_id for this section
+                            };
+                            lineIdCounter++; // Increment line_id counter for the next section
+                        } else {
+                            // Add properties to current section
+                            if (sectionName !== '') {
+                                idValuePairs[sectionName][p.id] = textContent;
+                            }
+                        }
+                    });
+                    // Process select tags and add their values to the current section
+                    selectTags.forEach(select => {
+                        const selectedValue = select.value;
+                        // console.log("tags:",selectedValue)
+                        if (sectionName !== '') {
+                            idValuePairs[sectionName][select.id] = selectedValue;
+                        }
+                    });
+                });
+            });
+            const filteredValues = {};
+
+Object.keys(idValuePairs).forEach(section => {
+    Object.keys(idValuePairs[section]).forEach(key => {
+        if (key.startsWith('top') || key.startsWith('bottom') || key.startsWith('direction')) {
+            filteredValues[key] = idValuePairs[section][key];
+        }
+    });
+});
+
+            console.log("Id value pairs", idValuePairs);
+            console.log("filteredvalues:",filteredValues)
+              
+              // #################################### ROI mapping detection checking ##############################
+        // console.log("current_camera_detection_active_status**",current_camera_detection_active_status)
+          
+        //   console.log("current_camera_detection_active_lineids**",current_camera_detection_active_lineids)
+          const positionMap = {
+              1: 'first',
+              2: 'second',
+              3: 'third'
+            
+          };
+          // console.log("position",positionMap)
+          current_camera_detection_active_lineids.forEach(lineid => {
+              const position = positionMap[lineid];
+              // const details = idValuePairs[position];
+              const details = filteredValues;
+              const topx = details[`line${lineid}_topx`];
+              // console.log("position:",position)
+              // console.log|("details:",details)
+              // console.log("topxxxxxxxxxxx:",topx)    
+              
+                if (topx === 'null') {
+         
+                 
+                    const errorModal = `
+                          <div class="modal fade" id="errorModal1" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                              <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h5 class="modal-title" id="errorModalLabel">Detection Active LineIDs Error</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">  
+Active Mapping Lines Can't be delete or Unmap the lineID =  ${lineid} 
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      `;
+                      document.body.insertAdjacentHTML('beforeend', errorModal);
+                      const errorModalElement = document.getElementById('errorModal1');
+                      const errorModalInstance = new bootstrap.Modal(errorModalElement);
+                      errorModalInstance.show();
+                      
+                      // setTimeout(() => {
+                      //     location.reload();
+                      //   }, 10000);
+                        modal.hide();
+                      exit;
+                } 
+             
+                         
+          });
+        // ##################################################################################################
+        
+
+            // Get points and camera IP
+            var infoPoints = document.querySelector('.points-info');
+            // console.log("info:",infoPoints);
+      
+    
+    
+            const points = infoPoints.textContent.trim();
+            // console.log("points:",points);
+            const splitPoints = points.split(/[,:]/);
+            // console.log("splitpoints:",splitPoints);
+            const camera_ip =  cameraIp
+            const project_select = projectId
+            const projectid = project_select.value;
+            console.log("&??&",idValuePairs)
+      
+    
+            // Construct API URL
+            const apiUrl = `/update_roi/${encodeURIComponent(camera_ip)}`;
+            const request = {
+              idValuePairs,   
+                              project_id: projectId  
+                          };
+    
+            try {
+                // Send PUT request to update points
+                const response = await fetch(apiUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(request)
+                });
+    
+                const responseData = await response.json();
+    
+                if (responseData.status_code === 1) {
+                    // Success message modal
+                    const successModal = `
+                        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="successModalLabel">Success</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Points successfully updated!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', successModal);
+                    const successModalElement = document.getElementById('successModal');
+                    const successModalInstance = new bootstrap.Modal(successModalElement);
+                    successModalInstance.show();
+
+
+                    const canvas_data = document.querySelector("canvas");
+                    const imagedata = canvas_data.toDataURL("image/jpeg"); 
+                    const pro = projectId
+                    const projectid = pro.value;
+                    // console.log("project_id:",projectid)
+                
+                   
+
+                    const imagerequest = {
+                      frameImage: imagedata, 
+                      project_id: projectId,
+                      camera_ip: cameraIp
+                    };
+                    console.log("project id:",projectId)
+                    console.log(" image request:",imagerequest)
+
+
+
+                    fetch("/main/save_frame_image", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify(imagerequest)
+                    })
+                      .then(response => response.json())
+                      .then(data => {
+                        if (data.status_code === 1) {
+                          console.log("Image saved successfully!", data.file_path);
+                        } else {
+                          console.error("Error saving image:", data.message);
+                        }
+                      })
+                      .catch(error => {
+                        console.error("Error:", error);
+                      });
+                        
+
+    
+                    // Reload the page after a delay
+                     setTimeout(() => {
+                       location.reload();
+                     }, 1000);
+                } else {
+                    // Error message modal
+                    const errorModal = `
+                        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">  
+                                        Failed to update points!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.insertAdjacentHTML('beforeend', errorModal);
+                    const errorModalElement = document.getElementById('errorModal');
+                    const errorModalInstance = new bootstrap.Modal(errorModalElement);
+                    errorModalInstance.show();
+                }
+            } catch (error) {
+                // Error message modal
+                const errorModal = `
+                    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Error updating points: ${error.message}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', errorModal);
+                const errorModalElement = document.getElementById('errorModal');
+                const errorModalInstance = new bootstrap.Modal(errorModalElement);
+                errorModalInstance.show();
+            } finally {
+                modal.hide();
+            }
+        });
+      }
+
+
+
+
+
+
+    function alertHandler(message, isSuccess) {
+    const alertContainer = document.getElementById('alert-container');
+    const alertClass = isSuccess ? 'alert-success' : 'alert-danger'; // Change class based on success or failure
+    const alertMessage = document.createElement('div');
+    alertMessage.className = `alert ${alertClass} alert-msg slide-in`;
+    alertMessage.textContent = message;
+
+    // Append the alert message to the container
+    alertContainer.appendChild(alertMessage);
+
+    // Trigger the slide-in effect
+    setTimeout(() => {
+        alertMessage.classList.add('slide-in-active');
+    }, 10);
+
+    // Remove the alert after some time
+    setTimeout(() => {
+        alertMessage.classList.remove('slide-in-active');
+        alertMessage.classList.add('slide-out-active');
+
+        // Remove the alert from the DOM after animation
+        setTimeout(() => {
+            alertContainer.removeChild(alertMessage);
+        }, 500);
+    }, 3000); // Duration before the alert starts to fade out
+}
+
+function dbupdate() {
+    fetch("/status_info", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Fetched Data:", data);
+
+        if (data.latest_status && data.latest_status.statuses && data.latest_status.statuses.detection_status === true) {
+            Toastify({
+                text: data.latest_status.message || "drawline Status is active!",
+                duration: 6000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                stopOnFocus: true
+            }).showToast();
+        }
+    })
+    .catch(error => console.error("Error fetching status update:", error));
+}
+
+setInterval(dbupdate, 28000);
+    
+    </script> -->
+    
+    </html>
+
