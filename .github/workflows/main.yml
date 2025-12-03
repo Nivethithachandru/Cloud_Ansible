@@ -22,4 +22,4 @@ jobs:
       
       - name: Run Ansible Playbook
         run: |
-          ansible-playbook sample.yml
+          ansible-playbook sample.yml -vvv
