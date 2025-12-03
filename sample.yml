@@ -1,20 +1,32 @@
 ---
-- name: Deploy Cloud_movable (Files already on remote)
+- name: Deploy Cloud_movable from GitHub repo
   hosts: ansible_client
   become: yes
+
   vars:
     remote_project_path: "/home/ubuntu/Cloud_movable"
+    git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
-     
-    - name: Build Docker image manually
+
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Clone latest Cloud_Ansible repo
+      git:
+        repo: "{{ git_repo_url }}"
+        dest: "{{ remote_project_path }}"
+        version: main    
+
+    - name: Build Docker image
       command: docker build -t movable .
       args:
         chdir: "{{ remote_project_path }}"
-      become: yes
-    
-    - name: Build Docker compose
-      command: docker-compose up -d
+
+    - name: Run Docker Compose (build + start)
+      command: docker-compose up -d --build
       args:
         chdir: "{{ remote_project_path }}"
-      become: yes
