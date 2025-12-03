@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libgl1 \
     libglib2.0-0 \
-    python3-distutils \ 
+    python3-distutils python3-opencv\ 
     && rm -rf /var/lib/apt/lists/
 
 
