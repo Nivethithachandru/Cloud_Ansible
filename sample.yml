@@ -15,12 +15,6 @@
         update_cache: yes
       become: yes
 
-    - name: Remove existing project folder (optional, ensures fresh clone)
-      file:
-        path: "{{ remote_project_path }}"
-        state: absent
-      become: yes
-
     - name: Clone Cloud_Ansible repo from GitHub
       git:
         repo: "{{ git_repo_url }}"
