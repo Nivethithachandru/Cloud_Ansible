@@ -28,11 +28,11 @@
       args:
         chdir: "{{ project_path }}"
       become: yes            
-      become_user: cosaiadmin 
+      become: root
     
     - name: Run Docker Compose (new syntax)
       command: docker-compose up -d 
       args:
         chdir: "{{ project_path }}"
       become: yes            
-      become_user: cosaiadmin 
+      become: root 
