@@ -1,34 +1,42 @@
 ---
 - name: Deploy Cloud_movable from GitHub repo
   hosts: ansible_client
-  
+  become: yes
+
   vars:
-    #remote_project_path: "/home/ubuntu/Cloud_Ansible"
+    project_path: "/home/{{ ansible_user }}/Cloud_Ansible"
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
 
-    - name: Ensure git is installed on remote host
+    - name: Ensure git is installed
       apt:
         name: git
         state: present
         update_cache: yes
-      become: yes
 
-    - name: Clone Cloud_Ansible repo from GitHub
+    - name: Clone Cloud_Ansible repo
       git:
         repo: "{{ git_repo_url }}"
         dest: "{{ project_path }}"
         version: main
-        depth: 1
         force: yes
 
-    - name: Disable Docker credential store
+    - name: Create .docker directory
+      file:
+        path: "/home/{{ ansible_user }}/.docker"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Disable Docker credential store for headless servers
       copy:
-        dest: "{{ ansible_env.HOME }}/.docker/config.json"
+        dest: "/home/{{ ansible_user }}/.docker/config.json"
         content: |
           {
-              "credsStore": ""
+            "auths": {},
+            "credsStore": ""
           }
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
@@ -39,7 +47,8 @@
       args:
         chdir: "{{ project_path }}"
 
-    - name: Run Docker Compose (build + start)
-      command: docker-compose up -d --build
+    - name: Run Docker Compose (new syntax)
+      command: docker-compose up -d 
       args:
         chdir: "{{ project_path }}"
+
