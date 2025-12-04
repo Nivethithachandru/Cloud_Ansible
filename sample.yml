@@ -23,6 +23,17 @@
         depth: 1
         force: yes
 
+    - name: Disable Docker credential store
+      copy:
+        dest: "{{ ansible_env.HOME }}/.docker/config.json"
+        content: |
+          {
+              "credsStore": ""
+          }
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
     - name: Build Docker image
       command: docker build -t movable .
       args:
