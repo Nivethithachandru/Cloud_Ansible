@@ -3,7 +3,7 @@
   hosts: ansible_client
   
   vars:
-    remote_project_path: "/home/ubuntu/Cloud_Ansible"
+    #remote_project_path: "/home/ubuntu/Cloud_Ansible"
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
@@ -18,7 +18,7 @@
     - name: Clone Cloud_Ansible repo from GitHub
       git:
         repo: "{{ git_repo_url }}"
-        dest: "{{ remote_project_path }}"
+        dest: "{{ project_path }}"
         version: main
         depth: 1
         force: yes
@@ -26,9 +26,9 @@
     - name: Build Docker image
       command: docker build -t movable .
       args:
-        chdir: "{{ remote_project_path }}"
+        chdir: "{{ project_path }}"
 
     - name: Run Docker Compose (build + start)
       command: docker-compose up -d --build
       args:
-        chdir: "{{ remote_project_path }}"
+        chdir: "{{ project_path }}"
