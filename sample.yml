@@ -10,6 +10,7 @@
   tasks:
     - name: Install Docker (separate file)
       import_tasks: tasks/docker_install.yml
+      when: "'docker_needed' in group_names"
 
     - name: Update apt cache
       apt:
