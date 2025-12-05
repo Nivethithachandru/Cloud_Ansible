@@ -24,6 +24,14 @@
         version: main
         force: yes
 
+    - name: Install Docker using official script
+      shell: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+      args:
+      executable: /bin/bash
+
+
     - name: Install Docker
       apt:
         name:
