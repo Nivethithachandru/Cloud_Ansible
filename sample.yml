@@ -31,6 +31,11 @@
         state: present
         update_cache: yes
 
+    - name: Install docker-compose
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: yes
 
 
     - name: Build Docker image
