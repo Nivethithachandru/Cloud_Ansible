@@ -29,7 +29,7 @@
         curl -fsSL https://get.docker.com -o get-docker.sh
         sh get-docker.sh
       args:
-      executable: /bin/bash
+        executable: /bin/bash
 
 
     - name: Install Docker
