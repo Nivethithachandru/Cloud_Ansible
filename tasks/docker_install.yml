@@ -1,5 +1,5 @@
 ---
-- name: Install Docker on Ubuntu 18.04
+- name: Install Docker 
   apt:
     name:
       - apt-transport-https
