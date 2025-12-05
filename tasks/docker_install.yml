@@ -34,6 +34,16 @@
     enabled: yes
     state: started
 
+- name: Remove old docker-compose binaries
+  shell: |
+    rm -f /usr/local/bin/docker-compose
+    rm -f /usr/bin/docker-compose
+    rm -f /usr/lib/python3/dist-packages/docker_compose*
+    rm -f /usr/lib/docker/cli-plugins/docker-compose
+    rm -f /usr/local/lib/docker/cli-plugins/docker-compose
+  args:
+    executable: /bin/bash
+
 - name: Install Docker Compose binary
   get_url:
     url: "https://github.com/docker/compose/releases/download/v2.35.1/docker-compose-Linux-x86_64"
