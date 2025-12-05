@@ -8,18 +8,12 @@
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
+    - name: Install Docker (separate file)
+      import_tasks: tasks/docker_install.yml
 
     - name: Update apt cache
       apt:
         update_cache: yes
-
-    - name: Ensure prerequisites are installed
-      apt:
-        name:
-          - git
-          - docker.io
-          - docker-compose
-        state: present
 
     - name: Clone Cloud_Ansible repo
       git:
@@ -28,11 +22,6 @@
         version: main
         force: yes
 
-    - name: Ensure docker service is running
-      service:
-        name: docker
-        state: started
-        enabled: yes
 
     - name: Build Docker image
       command: docker build -t movable .
