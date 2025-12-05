@@ -19,10 +19,10 @@
 
     - name: Enable and start Docker
       systemd:
-      name: docker
-      enabled: yes
-      state: started
-      daemon_reload: yes
+        name: docker
+        enabled: yes
+        state: started
+        daemon_reload: yes
 
     - name: Clone Cloud_Ansible repo
       git:
