@@ -1,47 +1,36 @@
-# tasks/docker_install.yml
+---
+- name: Install Docker on old Ubuntu
+  hosts: ansible_client
+  become: yes
 
-- name: Install prerequisites
-  apt:
-    name:
-      - ca-certificates
-      - curl
-      - gnupg2
-    state: present
-    update_cache: yes
+  tasks:
 
-- name: Add Docker GPG key
-  shell: |
-    install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    chmod a+r /etc/apt/keyrings/docker.asc
-  args:
-    executable: /bin/bash
+    - name: Update apt cache
+      apt:
+        update_cache: yes
 
-- name: Add Docker repository
-  shell: |
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-    https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-    > /etc/apt/sources.list.d/docker.list
-  args:
-    executable: /bin/bash
+    - name: Enable universe repo
+      apt_repository:
+        repo: "deb http://archive.ubuntu.com/ubuntu bionic universe"
+        state: present
 
-- name: Update apt cache
-  apt:
-    update_cache: yes
+    - name: Install prerequisites
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg2
+        state: present
 
-- name: Install Docker engine + compose plugin
-  apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: present
+    - name: Install Docker using official script
+      shell: |
+        curl -fsSL https://get.docker.com -o get-docker.sh
+        sh get-docker.sh
+      args:
+        executable: /bin/bash
 
-- name: Ensure docker service is running
-  service:
-    name: docker
-    state: started
-    enabled: yes
+    - name: Install docker-compose v2 manually
+      shell: |
+        curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m) \
+        -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
