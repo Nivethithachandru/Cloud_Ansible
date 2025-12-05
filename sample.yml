@@ -12,9 +12,9 @@
       import_tasks: tasks/docker_install.yml
       when: "'docker_needed' in group_names"
 
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+    #- name: Update apt cache
+     # apt:
+      #  update_cache: yes
 
 
     - name: Enable and start Docker
