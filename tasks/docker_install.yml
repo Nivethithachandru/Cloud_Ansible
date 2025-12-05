@@ -1,36 +1,36 @@
 ---
-- name: Install Docker on old Ubuntu
-  hosts: ansible_client
-  become: yes
+- name: Install Docker on Ubuntu 18.04
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg2
+      - software-properties-common
+    state: present
+    update_cache: yes
 
-  tasks:
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
 
-    - name: Update apt cache
-      apt:
-        update_cache: yes
+- name: Add Docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+    state: present
 
-    - name: Enable universe repo
-      apt_repository:
-        repo: "deb http://archive.ubuntu.com/ubuntu bionic universe"
-        state: present
+- name: Install Docker CE
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+    update_cache: yes
 
-    - name: Install prerequisites
-      apt:
-        name:
-          - ca-certificates
-          - curl
-          - gnupg2
-        state: present
-
-    - name: Install Docker using official script
-      shell: |
-        curl -fsSL https://get.docker.com -o get-docker.sh
-        sh get-docker.sh
-      args:
-        executable: /bin/bash
-
-    - name: Install docker-compose v2 manually
-      shell: |
-        curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m) \
-        -o /usr/local/bin/docker-compose
-        chmod +x /usr/local/bin/docker-compose
+- name: Install docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-`uname -s`-`uname -m`
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
