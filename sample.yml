@@ -16,6 +16,13 @@
       apt:
         update_cache: yes
 
+
+    - name: Enable and start Docker
+      systemd:
+      name: docker
+      enabled: yes
+      state: started
+
     - name: Clone Cloud_Ansible repo
       git:
         repo: "{{ git_repo_url }}"
