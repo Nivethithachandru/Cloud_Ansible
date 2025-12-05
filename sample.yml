@@ -25,18 +25,20 @@
         force: yes
 
 
-    - name: Install Docker
-      apt:
-        name:
-          - docker.io
-        state: present
-        update_cache: yes
+   - name: Install Docker using official script
+     become: yes
+     shell: |
+       curl -fsSL https://get.docker.com -o get-docker.sh
+       sh get-docker.sh
+     args:
+       executable: /bin/bash
 
-    - name: Install docker-compose
-      apt:
-        name: docker-compose
-        state: present
-        update_cache: yes
+   - name: Install docker-compose v2
+     become: yes
+     shell: |
+       curl -SL https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-$(uname -s)-$(uname -m) \
+       -o /usr/local/bin/docker-compose
+       chmod +x /usr/local/bin/docker-compose
 
 
     - name: Build Docker image
