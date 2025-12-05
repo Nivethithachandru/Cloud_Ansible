@@ -8,7 +8,7 @@
     git_repo_url: "https://github.com/Nivethithachandru/Cloud_Ansible.git"
 
   tasks:
-    - name: Install Docker (separate file)
+    - name: Install Docker
       import_tasks: tasks/docker_install.yml
       when: "'docker_needed' in group_names"
 
