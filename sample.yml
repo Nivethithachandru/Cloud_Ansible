@@ -24,6 +24,14 @@
         version: main
         force: yes
 
+    - name: Install Docker
+      apt:
+        name:
+          - docker.io
+        state: present
+        update_cache: yes
+
+
 
     - name: Build Docker image
       command: docker build -t movable .
