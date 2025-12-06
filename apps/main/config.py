@@ -22,5 +22,7 @@ BACKUP_DELETION = False
 
 # BASE_UPLOAD_DIRECTORY = "/root/Movable/kishore/Cloud_movable/files/cloud_video/"
 BASE_UPLOAD_DIRECTORY = "/root/Documents/cloud_movable_update/Cloud_movable/files/cloud_video/"
-WEBSOCKET_CLOUD_URL ="sesha.cosai.in"
-WEBSOCKET_CLOUD_PREVIEW ="sesha.cosai.in"
+WEBSOCKET_CLOUD_URL ="52.207.238.30:8016"
+WEBSOCKET_CLOUD_URL ="10.0.0.75:8016"
+WEBSOCKET_CLOUD_URL ="10.0.0.120:8016"
+#WEBSOCKET_CLOUD_PREVIEW ="sesha.cosai.in"
