@@ -15,7 +15,7 @@ services:
     env_file:
       - .env
     environment:
-      HOSTDB_URL:  postgresql+asyncpg://postgres:cosai@db:5432/product_test_develop
+      HOSTDB_URL:  "postgresql://postgres:cosai@db:5432/product_test_develop"
     depends_on:
       - db
   nginx:
