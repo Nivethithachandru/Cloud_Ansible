@@ -38,6 +38,7 @@
         chdir: "{{ project_path }}"
 
     - name: Run Docker Compose
+      command: docker-compose down
       command: docker-compose up -d
       args:
         chdir: "{{ project_path }}"
