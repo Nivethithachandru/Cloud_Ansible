@@ -103,7 +103,7 @@
 var WEBSOCKET_CLOUD_URL = "{{ WEBSOCKET_CLOUD_URL }}";
 
   function startWebSocket(cameraId, lpu_id) {
-    const wsUrl = `wss://${WEBSOCKET_CLOUD_URL}/ws/stream/view/${lpu_id}/${cameraId}/`;
+    const wsUrl = `ws://${WEBSOCKET_CLOUD_URL}/ws/stream/view/${lpu_id}/${cameraId}/`;
     const imgElement = document.getElementById(`video-frame-${cameraId}`);
     const errorElement = document.getElementById(`error-message-${cameraId}`);
 
